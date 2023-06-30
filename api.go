@@ -6,14 +6,19 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
-	"testing"
 )
+
+// TestingT is an interface wrapper around *testing.T
+type TestingT interface {
+	Fatal(args ...any)
+	Fatalf(format string, args ...any)
+}
 
 type ApiMock struct {
 	testServer  *httptest.Server
 	calls       map[HttpCall]http.HandlerFunc
-	t           *testing.T
-	invocations map[HttpCall]*Invocation
+	testState   TestingT
+	invocations map[HttpCall][]*Invocation
 }
 
 type HttpCall struct {
@@ -24,14 +29,14 @@ type HttpCall struct {
 type Invocation struct {
 	request        *http.Request
 	requestContent []byte
-	t              *testing.T
+	testState      TestingT
 }
 
-func Api(t *testing.T) *ApiMock {
+func Api(testCase TestingT) *ApiMock {
 	mockedApi := &ApiMock{
 		calls:       map[HttpCall]http.HandlerFunc{},
-		t:           t,
-		invocations: map[HttpCall]*Invocation{},
+		testState:   testCase,
+		invocations: map[HttpCall][]*Invocation{},
 	}
 
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, request *http.Request) {
@@ -43,23 +48,23 @@ func Api(t *testing.T) *ApiMock {
 
 		bytes, err := io.ReadAll(request.Body)
 		if err != nil {
-			t.Fatal(err)
+			testCase.Fatal(err)
 		}
 
-		invocations := mockedApi.invocations
-		invocations[call] = &Invocation{
+		invocations := mockedApi.invocations[call]
+		invocations = append(invocations, &Invocation{
 			request:        request,
 			requestContent: bytes,
-			t:              t,
-		}
-		mockedApi.invocations = invocations
+			testState:      testCase,
+		})
+		mockedApi.invocations[call] = invocations
 
 		handler := mockedApi.calls[call]
 		if handler != nil {
 			handler(res, request)
 		} else {
 			res.WriteHeader(404)
-			t.Fatalf("unmocked invocation %s %s\n", call.Method, call.Path)
+			testCase.Fatalf("unmocked invocation %s %s\n", call.Method, call.Path)
 		}
 	}))
 	mockedApi.testServer = testServer
@@ -74,7 +79,7 @@ func (mockedApi *ApiMock) Close() {
 func (mockedApi *ApiMock) GetUrl() *url.URL {
 	testServerUrl, err := url.Parse(mockedApi.testServer.URL)
 	if err != nil {
-		mockedApi.t.Fatal(err)
+		mockedApi.testState.Fatal(err)
 	}
 	return testServerUrl
 }
@@ -85,6 +90,16 @@ func (mockedApi *ApiMock) GetHost() string {
 
 func (mockedApi *ApiMock) Stub(method string, path string) *StubBuilder {
 	return &StubBuilder{
+		api: mockedApi,
+		call: &HttpCall{
+			Method: strings.ToLower(method),
+			Path:   path,
+		},
+	}
+}
+
+func (mockedApi *ApiMock) Verify(method string, path string) *CallVerifier {
+	return &CallVerifier{
 		api: mockedApi,
 		call: &HttpCall{
 			Method: strings.ToLower(method),
