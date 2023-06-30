@@ -10,6 +10,7 @@ import (
 
 // TestingT is an interface wrapper around *testing.T
 type TestingT interface {
+	Error(args ...any)
 	Fatal(args ...any)
 	Fatalf(format string, args ...any)
 }
@@ -24,12 +25,6 @@ type ApiMock struct {
 type HttpCall struct {
 	Method string
 	Path   string
-}
-
-type Invocation struct {
-	request        *http.Request
-	requestContent []byte
-	testState      TestingT
 }
 
 func Api(testCase TestingT) *ApiMock {

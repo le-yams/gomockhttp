@@ -5,13 +5,15 @@ type CallVerifier struct {
 	call *HttpCall
 }
 
-func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) {
-	actualCallsCount := len(verifier.api.invocations[*verifier.call])
+func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) []*Invocation {
+	invocations := verifier.api.invocations[*verifier.call]
+	actualCallsCount := len(invocations)
 	if actualCallsCount != expectedCallsCount {
 		verifier.api.testState.Fatalf("got %d http calls but was expecting %d\n", actualCallsCount, expectedCallsCount)
 	}
+	return invocations
 }
 
-func (verifier *CallVerifier) HasBeenCalledOnce() {
-	verifier.HasBeenCalled(1)
+func (verifier *CallVerifier) HasBeenCalledOnce() *Invocation {
+	return verifier.HasBeenCalled(1)[0]
 }

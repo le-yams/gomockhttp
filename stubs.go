@@ -16,6 +16,12 @@ func (stub *StubBuilder) With(handler http.HandlerFunc) *ApiMock {
 	return stub.api
 }
 
+func (stub *StubBuilder) WithStatusCode(statusCode int) *ApiMock {
+	return stub.With(func(writer http.ResponseWriter, request *http.Request) {
+		writer.WriteHeader(statusCode)
+	})
+}
+
 func (stub *StubBuilder) WithJson(statusCode int, content interface{}) *ApiMock {
 	return stub.With(func(writer http.ResponseWriter, request *http.Request) {
 
