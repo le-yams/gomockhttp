@@ -9,23 +9,24 @@ import (
 
 func TestApiNotStubbedEndpoint(t *testing.T) {
 	// Arrange
-	testState := &testing.T{}
+	testState := NewTestingMock()
 	mockedApi := Api(testState)
 	defer func() { mockedApi.Close() }()
 
 	// Act
 	client := http.Client{}
-	_, err := client.Get(mockedApi.GetUrl().String() + "/endpoint")
+	response, err := client.Get(mockedApi.GetUrl().String() + "/endpoint")
 
 	// Assert
 	assert := assertions.New(t)
-	assert.Error(err)
-	assert.Equal(true, testState.Failed())
+	assert.NoError(err)
+	assert.Equal(true, testState.DidFatalOccurred())
+	assert.Equal(404, response.StatusCode)
 }
 
 func TestApiStubbedEndpoint(t *testing.T) {
 	// Arrange
-	testState := &testing.T{}
+	testState := NewTestingMock()
 	mockedApi := Api(testState)
 	defer func() { mockedApi.Close() }()
 
@@ -51,12 +52,12 @@ func TestApiStubbedEndpoint(t *testing.T) {
 		Status(http.StatusCreated).
 		Body().IsEqual("Hello")
 
-	assert.Equal(false, testState.Failed())
+	assert.Equal(false, testState.DidFatalOccurred())
 }
 
 func TestApiStubbedEndpointWithJson(t *testing.T) {
 	// Arrange
-	testState := &testing.T{}
+	testState := NewTestingMock()
 	mockedApi := Api(testState)
 	defer func() { mockedApi.Close() }()
 
@@ -70,7 +71,7 @@ func TestApiStubbedEndpointWithJson(t *testing.T) {
 
 	// Assert
 	assert := assertions.New(t)
-	assert.Equal(false, testState.Failed())
+	assert.Equal(false, testState.DidFatalOccurred())
 
 	responseObject := e.GET("/endpoint").
 		Expect().
