@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestApiStubbedEndpointInvocationsPassingCountVerification(t *testing.T) {
+func TestVerifyingInvocationsCountPasses(t *testing.T) {
 	// Arrange
 	testState := NewTestingMock()
 	mockedApi := Api(testState)
@@ -26,10 +26,9 @@ func TestApiStubbedEndpointInvocationsPassingCountVerification(t *testing.T) {
 	// Assert
 	assert := assertions.New(t)
 	assert.Equal(false, testState.DidFatalOccurred())
-
 }
 
-func TestApiStubbedEndpointInvocationsFailingCountVerification(t *testing.T) {
+func TestVerifyingInvocationsCountFails(t *testing.T) {
 	// Arrange
 	testState := NewTestingMock()
 	mockedApi := Api(testState)
@@ -49,5 +48,48 @@ func TestApiStubbedEndpointInvocationsFailingCountVerification(t *testing.T) {
 	// Assert
 	assert := assertions.New(t)
 	assert.Equal(true, testState.DidFatalOccurred())
+}
 
+func TestVerifyingSingleInvocationPasses(t *testing.T) {
+	// Arrange
+	testState := NewTestingMock()
+	mockedApi := Api(testState)
+	defer func() { mockedApi.Close() }()
+
+	content := &TestDto{Value: "Hello"}
+	mockedApi.
+		Stub("GET", "/endpoint").
+		WithJson(http.StatusOK, content)
+
+	// Act
+	client := http.Client{}
+	_, _ = client.Get(mockedApi.GetUrl().String() + "/endpoint")
+	mockedApi.Verify("GET", "/endpoint").HasBeenCalledOnce()
+
+	// Assert
+	assert := assertions.New(t)
+	assert.Equal(false, testState.DidFatalOccurred())
+
+}
+
+func TestVerifyingSingleInvocationFails(t *testing.T) {
+	// Arrange
+	testState := NewTestingMock()
+	mockedApi := Api(testState)
+	defer func() { mockedApi.Close() }()
+
+	content := &TestDto{Value: "Hello"}
+	mockedApi.
+		Stub("GET", "/endpoint").
+		WithJson(http.StatusOK, content)
+
+	// Act
+	client := http.Client{}
+	_, _ = client.Get(mockedApi.GetUrl().String() + "/endpoint")
+	_, _ = client.Get(mockedApi.GetUrl().String() + "/endpoint")
+	mockedApi.Verify("GET", "/endpoint").HasBeenCalledOnce()
+
+	// Assert
+	assert := assertions.New(t)
+	assert.Equal(true, testState.DidFatalOccurred())
 }

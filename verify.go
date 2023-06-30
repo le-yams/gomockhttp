@@ -11,3 +11,7 @@ func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) {
 		verifier.api.testState.Fatalf("got %d http calls but was expecting %d\n", actualCallsCount, expectedCallsCount)
 	}
 }
+
+func (verifier *CallVerifier) HasBeenCalledOnce() {
+	verifier.HasBeenCalled(1)
+}
