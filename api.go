@@ -1,7 +1,6 @@
 package mockhttp
 
 import (
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -11,6 +10,7 @@ import (
 // TestingT is an interface wrapper around *testing.T
 type TestingT interface {
 	Error(args ...any)
+	Errorf(format string, args ...any)
 	Fatal(args ...any)
 	Fatalf(format string, args ...any)
 }
@@ -27,10 +27,10 @@ type HttpCall struct {
 	Path   string
 }
 
-func Api(testCase TestingT) *ApiMock {
+func Api(testState TestingT) *ApiMock {
 	mockedApi := &ApiMock{
 		calls:       map[HttpCall]http.HandlerFunc{},
-		testState:   testCase,
+		testState:   testState,
 		invocations: map[HttpCall][]*Invocation{},
 	}
 
@@ -41,17 +41,8 @@ func Api(testCase TestingT) *ApiMock {
 			Path:   request.RequestURI,
 		}
 
-		bytes, err := io.ReadAll(request.Body)
-		if err != nil {
-			testCase.Fatal(err)
-		}
-
 		invocations := mockedApi.invocations[call]
-		invocations = append(invocations, &Invocation{
-			request:        request,
-			requestContent: bytes,
-			testState:      testCase,
-		})
+		invocations = append(invocations, newInvocation(request, testState))
 		mockedApi.invocations[call] = invocations
 
 		handler := mockedApi.calls[call]
@@ -59,7 +50,7 @@ func Api(testCase TestingT) *ApiMock {
 			handler(res, request)
 		} else {
 			res.WriteHeader(404)
-			testCase.Fatalf("unmocked invocation %s %s\n", call.Method, call.Path)
+			testState.Fatalf("unmocked invocation %s %s\n", call.Method, call.Path)
 		}
 	}))
 	mockedApi.testServer = testServer

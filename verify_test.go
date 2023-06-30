@@ -79,15 +79,13 @@ func TestVerifyingInvocationsCountReturnsThePerformedCalls(t *testing.T) {
 	call1Content := struct {
 		Foo string `json:"foo"`
 	}{}
-	err := call1.ReadRequestContentAsJson(&call1Content)
-	if err != nil {
-		t.Fatal(err)
-	}
+	call1.ReadJsonPayload(&call1Content)
 	assert.Equal("bar", call1Content.Foo)
 
 	call2 := calls[1]
-	assert.Equal("text/plain", call2.GetRequest().Header.Get("Content-Type"))
-	assert.Equal("Hello", call2.ReadRequestContentAsString())
+	call2.
+		WithHeader("Content-Type", "text/pain").
+		WithStringPayload("Hello")
 }
 
 func TestVerifyingSingleInvocationPasses(t *testing.T) {
@@ -145,10 +143,9 @@ func TestVerifyingSingleInvocationReturnsThePerformedCall(t *testing.T) {
 	_, _ = client.Post(endpointUrl, "text/plain", bytes.NewBuffer([]byte("Hello")))
 
 	// Act
-	call := mockedApi.Verify(http.MethodPost, endpoint).HasBeenCalledOnce()
-
-	// Assert
-	assert := assertions.New(t)
-	assert.Equal("text/plain", call.GetRequest().Header.Get("Content-Type"))
-	assert.Equal("Hello", call.ReadRequestContentAsString())
+	_ = mockedApi.
+		Verify(http.MethodPost, endpoint).
+		HasBeenCalledOnce().
+		WithStringPayload("Hello").
+		WithHeader("Content-Type", "text/plain")
 }

@@ -24,6 +24,11 @@ func (testState *MockT) Error(args ...interface{}) {
 	testState.errorOccurred = true
 }
 
+func (testState *MockT) Errorf(format string, args ...interface{}) {
+	_, _ = format, args
+	testState.errorOccurred = true
+}
+
 func (testState *MockT) Fatalf(format string, args ...interface{}) {
 	_, _ = format, args
 	testState.fatalOccurred = true
