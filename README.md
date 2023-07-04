@@ -61,14 +61,18 @@ type FooDto struct {
 }
 
 func TestApiCall(t *testing.T) {
+  // Arrange
   api := mockhttp.Api(t)
-  api.Stub(http.MethodGet, "/foo").
+  api.
+    Stub(http.MethodGet, "/foo").
     WithJson(http.StatusOK, &FooDto{Bar: "bar"})
   token := "testToken"
 
+  //Act
   fooService := NewFooService(api.GetUrl(), token)
-  bar := fooService.GetBar() // the code to be tested calling the api endpoint to rerieve the value
+  bar := fooService.GetBar() // the code actually making the http call to the api endpoint
 
+  // Assert
   if bar != "bar" {
     t.Errorf("unexpected bar value: %s\n", bar)
   }
