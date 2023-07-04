@@ -10,6 +10,7 @@ Create the API mock
 ```go
 func TestApiCall(t *testing.T) {
   api := mockhttp.Api(t)
+  defer func() { api.Close() }()
   //...
 }
 ```
@@ -63,6 +64,8 @@ type FooDto struct {
 func TestApiCall(t *testing.T) {
   // Arrange
   api := mockhttp.Api(t)
+  defer func() { api.Close() }()
+
   api.
     Stub(http.MethodGet, "/foo").
     WithJson(http.StatusOK, &FooDto{Bar: "bar"})
