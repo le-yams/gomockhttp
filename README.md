@@ -58,7 +58,7 @@ import (
 )
 
 type FooDto struct {
-  Bar string `json:"foo"`
+  Foo string `json:"foo"`
 }
 
 func TestApiCall(t *testing.T) {
@@ -68,16 +68,16 @@ func TestApiCall(t *testing.T) {
 
   api.
     Stub(http.MethodGet, "/foo").
-    WithJson(http.StatusOK, &FooDto{Bar: "bar"})
+    WithJson(http.StatusOK, &FooDto{Foo: "bar"})
   token := "testToken"
 
   //Act
   fooService := NewFooService(api.GetUrl(), token)
-  bar := fooService.GetBar() // the code actually making the http call to the api endpoint
+  foo := fooService.GetFoo() // the code actually making the http call to the api endpoint
 
   // Assert
-  if bar != "bar" {
-    t.Errorf("unexpected bar value: %s\n", bar)
+  if foo != "bar" {
+    t.Errorf("unexpected value: %s\n", foo)
   }
 
   api.
