@@ -1,4 +1,10 @@
-# gomockhttp [![Go Report Card](https://goreportcard.com/badge/github.com/le-yams/gomockhttp)](https://goreportcard.com/report/github.com/le-yams/gomockhttp) [![GoDoc](https://godoc.org/github.com/le-yams/gomockhttp?status.svg)](https://godoc.org/github.com/le-yams/gomockhttp) [![Version](https://img.shields.io/github/tag/le-yams/gomockhttp.svg)](https://github.com/le-yams/gomockhttp/releases)
+# gomockhttp 
+[![Build Status](https://github.com/le-yams/gomockhttp/workflows/Build/badge.svg?branch=master)](https://github.com/le-yams/gomockhttp/actions?query=workflow%3ABuild)
+[![Coverage Status](https://coveralls.io/repos/github/le-yams/gomockhttp/badge.svg?branch=master)](https://coveralls.io/github/le-yams/gomockhttp?branch=v1)
+[![Go Report Card](https://goreportcard.com/badge/github.com/le-yams/gomockhttp)](https://goreportcard.com/report/github.com/le-yams/gomockhttp)
+[![GoDoc](https://godoc.org/github.com/le-yams/gomockhttp?status.svg)](https://godoc.org/github.com/le-yams/gomockhttp)
+[![Version](https://img.shields.io/github/tag/le-yams/gomockhttp.svg)](https://github.com/le-yams/gomockhttp/releases)
+
 
 A fluent testing library for mocking http apis.
 * Mock the external http apis your code is calling.
