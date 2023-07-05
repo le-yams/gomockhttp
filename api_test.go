@@ -1,8 +1,9 @@
 package mockhttp
 
 import (
-	assertions "github.com/stretchr/testify/assert"
 	"testing"
+
+	assertions "github.com/stretchr/testify/assert"
 )
 
 type MockT struct {

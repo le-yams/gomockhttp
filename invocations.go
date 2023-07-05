@@ -3,9 +3,10 @@ package mockhttp
 import (
 	"bytes"
 	"encoding/json"
-	assertions "github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
+
+	assertions "github.com/stretchr/testify/assert"
 )
 
 type Invocation struct {

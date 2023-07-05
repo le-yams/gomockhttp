@@ -2,9 +2,10 @@ package mockhttp
 
 import (
 	"bytes"
-	assertions "github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	assertions "github.com/stretchr/testify/assert"
 )
 
 func TestInvocation_GetRequest(t *testing.T) {

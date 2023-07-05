@@ -1,10 +1,11 @@
 package mockhttp
 
 import (
-	"github.com/gavv/httpexpect/v2"
-	assertions "github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/gavv/httpexpect/v2"
+	assertions "github.com/stretchr/testify/assert"
 )
 
 func TestApiNotStubbedEndpoint(t *testing.T) {
