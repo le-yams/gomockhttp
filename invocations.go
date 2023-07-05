@@ -64,7 +64,7 @@ func (call *Invocation) WithStringPayload(expected string) *Invocation {
 	return call
 }
 
-func (call *Invocation) ReadJsonPayload(obj any) {
+func (call *Invocation) ReadJSONPayload(obj any) {
 	err := json.Unmarshal(call.GetPayload(), obj)
 	if err != nil {
 		call.testState.Fatal(err)

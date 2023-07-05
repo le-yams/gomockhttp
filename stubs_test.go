@@ -10,12 +10,12 @@ import (
 func TestApiNotStubbedEndpoint(t *testing.T) {
 	// Arrange
 	testState := NewTestingMock(t)
-	mockedApi := Api(testState)
-	defer func() { mockedApi.Close() }()
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
 
 	// Act
 	client := http.Client{}
-	response, err := client.Get(mockedApi.GetUrl().String() + "/endpoint")
+	response, err := client.Get(mockedAPI.GetURL().String() + "/endpoint")
 
 	// Assert
 	assert := assertions.New(t)
@@ -27,13 +27,12 @@ func TestApiNotStubbedEndpoint(t *testing.T) {
 func TestApiStubbedEndpoint(t *testing.T) {
 	// Arrange
 	testState := NewTestingMock(t)
-	mockedApi := Api(testState)
-	defer func() { mockedApi.Close() }()
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
 
-	mockedApi.
+	mockedAPI.
 		Stub(http.MethodGet, "/endpoint").
 		With(func(writer http.ResponseWriter, request *http.Request) {
-
 			writer.Header().Add("Content-Type", "text/plain")
 			writer.WriteHeader(201)
 			_, err := writer.Write([]byte("Hello"))
@@ -43,7 +42,7 @@ func TestApiStubbedEndpoint(t *testing.T) {
 		})
 
 	// Act
-	e := httpexpect.Default(t, mockedApi.GetUrl().String())
+	e := httpexpect.Default(t, mockedAPI.GetURL().String())
 
 	// Assert
 	e.GET("/endpoint").
@@ -57,17 +56,17 @@ func TestApiStubbedEndpoint(t *testing.T) {
 func TestApiStubbedEndpointWithJson(t *testing.T) {
 	// Arrange
 	testState := NewTestingMock(t)
-	mockedApi := Api(testState)
-	defer func() { mockedApi.Close() }()
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
 
-	mockedApi.
+	mockedAPI.
 		Stub(http.MethodGet, "/endpoint").
-		WithJson(http.StatusOK, struct {
+		WithJSON(http.StatusOK, struct {
 			Value string `json:"value"`
 		}{Value: "Hello"})
 
 	// Act
-	e := httpexpect.Default(t, mockedApi.GetUrl().String())
+	e := httpexpect.Default(t, mockedAPI.GetURL().String())
 
 	// Assert
 	testState.assertDidNotFailed()

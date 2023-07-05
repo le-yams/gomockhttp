@@ -62,11 +62,11 @@ func (testState *MockT) assertFailedWithFatal() {
 
 func TestApiUrl(t *testing.T) {
 	// Arrange
-	mockedApi := Api(NewTestingMock(t))
-	defer func() { mockedApi.Close() }()
+	mockedAPI := API(NewTestingMock(t))
+	defer func() { mockedAPI.Close() }()
 
 	// Assert
 	assert := assertions.New(t)
-	assert.Equal(mockedApi.testServer.URL, mockedApi.GetUrl().String())
-	assert.Equal(mockedApi.GetUrl().Host, mockedApi.GetHost())
+	assert.Equal(mockedAPI.testServer.URL, mockedAPI.GetURL().String())
+	assert.Equal(mockedAPI.GetURL().Host, mockedAPI.GetHost())
 }

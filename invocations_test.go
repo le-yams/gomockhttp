@@ -126,7 +126,6 @@ func TestInvocation_WithPayload_Pass(t *testing.T) {
 	invocation.WithPayload([]byte("foo"))
 
 	testState.assertDidNotFailed()
-
 }
 
 func TestInvocation_WithPayload_Fail(t *testing.T) {
@@ -176,7 +175,7 @@ func TestInvocation_ReadJsonPayload(t *testing.T) {
 		Foo string `json:"foo"`
 	}{}
 
-	invocation.ReadJsonPayload(&json)
+	invocation.ReadJSONPayload(&json)
 
 	assert := assertions.New(t)
 	assert.Equal("bar", json.Foo)
@@ -190,7 +189,7 @@ func TestInvocation_ReadJsonPayload_ErrorHandling(t *testing.T) {
 	json := struct {
 		Foo string `json:"foo"`
 	}{}
-	invocation.ReadJsonPayload(&json)
+	invocation.ReadJSONPayload(&json)
 
 	testState.assertFailedWithFatal()
 }
@@ -201,7 +200,6 @@ func buildRequest(t *testing.T, method string, url string, data []byte) *http.Re
 		t.Fatal(err)
 	}
 	return request
-
 }
 
 func buildRequestWithBody(t *testing.T, data []byte) *http.Request {
@@ -210,5 +208,4 @@ func buildRequestWithBody(t *testing.T, data []byte) *http.Request {
 		t.Fatal(err)
 	}
 	return request
-
 }

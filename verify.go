@@ -1,8 +1,8 @@
 package mockhttp
 
 type CallVerifier struct {
-	api  *ApiMock
-	call *HttpCall
+	api  *APIMock
+	call *HTTPCall
 }
 
 func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) []*Invocation {
