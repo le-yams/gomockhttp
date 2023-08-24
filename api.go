@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync"
 )
 
 // TestingT is an interface wrapper around *testing.T.
@@ -20,6 +21,7 @@ type APIMock struct {
 	calls       map[HTTPCall]http.HandlerFunc
 	testState   TestingT
 	invocations map[HTTPCall][]*Invocation
+	mu          sync.Mutex
 }
 
 type HTTPCall struct {
@@ -40,9 +42,11 @@ func API(testState TestingT) *APIMock {
 			Path:   request.RequestURI,
 		}
 
+		mockedAPI.mu.Lock()
 		invocations := mockedAPI.invocations[call]
 		invocations = append(invocations, newInvocation(request, testState))
 		mockedAPI.invocations[call] = invocations
+		mockedAPI.mu.Unlock()
 
 		handler := mockedAPI.calls[call]
 		if handler != nil {
