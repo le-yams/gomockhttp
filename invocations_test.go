@@ -9,7 +9,8 @@ import (
 )
 
 func TestInvocation_GetRequest(t *testing.T) {
-	expectedRequest := buildRequest(t, http.MethodGet, "/endpoint", nil)
+	t.Parallel()
+	expectedRequest := buildRequest(t, http.MethodGet, "/foo", nil)
 
 	invocation := newInvocation(expectedRequest, t)
 
@@ -18,6 +19,7 @@ func TestInvocation_GetRequest(t *testing.T) {
 }
 
 func TestInvocation_Chaining_Verifications(t *testing.T) {
+	t.Parallel()
 	payload := []byte{42}
 	request := buildRequest(t, http.MethodPost, "/endpoint", payload)
 	request.Header.Add("foo", "bar")
@@ -35,6 +37,7 @@ func TestInvocation_Chaining_Verifications(t *testing.T) {
 }
 
 func TestInvocation_WithHeader_Pass(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 	request.Header.Add("foo", "bar")
 
@@ -47,6 +50,7 @@ func TestInvocation_WithHeader_Pass(t *testing.T) {
 }
 
 func TestInvocation_WithHeader_MultipleValues_Pass(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 	request.Header.Add("foo", "bar1")
 	request.Header.Add("foo", "bar2")
@@ -60,6 +64,7 @@ func TestInvocation_WithHeader_MultipleValues_Pass(t *testing.T) {
 }
 
 func TestInvocation_WithHeader_Fail_WhenMissingHeader(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 
 	testState := NewTestingMock(t)
@@ -71,6 +76,7 @@ func TestInvocation_WithHeader_Fail_WhenMissingHeader(t *testing.T) {
 }
 
 func TestInvocation_WithHeader_Fail_WhenHeaderWrongValue(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 	request.Header.Add("foo", "bar")
 
@@ -83,6 +89,7 @@ func TestInvocation_WithHeader_Fail_WhenHeaderWrongValue(t *testing.T) {
 }
 
 func TestInvocation_WithHeader_Fail_WhenHeaderWrongValues(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 	request.Header.Add("foo", "bar1")
 	request.Header.Add("foo", "bar2")
@@ -96,6 +103,7 @@ func TestInvocation_WithHeader_Fail_WhenHeaderWrongValues(t *testing.T) {
 }
 
 func TestInvocation_WithoutHeader_Pass(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 
 	testState := NewTestingMock(t)
@@ -107,6 +115,7 @@ func TestInvocation_WithoutHeader_Pass(t *testing.T) {
 }
 
 func TestInvocation_WithoutHeader_Fail(t *testing.T) {
+	t.Parallel()
 	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
 	request.Header.Add("foo", "bar")
 
@@ -119,6 +128,7 @@ func TestInvocation_WithoutHeader_Fail(t *testing.T) {
 }
 
 func TestInvocation_WithPayload_Pass(t *testing.T) {
+	t.Parallel()
 	testState := NewTestingMock(t)
 
 	request := buildRequestWithBody(t, []byte("foo"))
@@ -130,6 +140,7 @@ func TestInvocation_WithPayload_Pass(t *testing.T) {
 }
 
 func TestInvocation_WithPayload_Fail(t *testing.T) {
+	t.Parallel()
 	testState := NewTestingMock(t)
 	request := buildRequestWithBody(t, []byte{42})
 	invocation := newInvocation(request, testState)
@@ -140,6 +151,7 @@ func TestInvocation_WithPayload_Fail(t *testing.T) {
 }
 
 func TestInvocation_GetRequestContent(t *testing.T) {
+	t.Parallel()
 	expectedRequestContent := []byte{42}
 	request := buildRequestWithBody(t, expectedRequestContent)
 	invocation := newInvocation(request, t)
@@ -149,6 +161,7 @@ func TestInvocation_GetRequestContent(t *testing.T) {
 }
 
 func TestInvocation_WithStringPayload_Pass(t *testing.T) {
+	t.Parallel()
 	request := buildRequestWithBody(t, []byte("foo"))
 	testState := NewTestingMock(t)
 	invocation := newInvocation(request, testState)
@@ -159,6 +172,7 @@ func TestInvocation_WithStringPayload_Pass(t *testing.T) {
 }
 
 func TestInvocation_WithStringPayload_Fail(t *testing.T) {
+	t.Parallel()
 	request := buildRequestWithBody(t, []byte("foo"))
 	testState := NewTestingMock(t)
 	invocation := newInvocation(request, testState)
@@ -169,6 +183,7 @@ func TestInvocation_WithStringPayload_Fail(t *testing.T) {
 }
 
 func TestInvocation_ReadJsonPayload(t *testing.T) {
+	t.Parallel()
 	request := buildRequestWithBody(t, []byte(`{"foo":"bar"}`))
 	invocation := newInvocation(request, t)
 
@@ -183,6 +198,7 @@ func TestInvocation_ReadJsonPayload(t *testing.T) {
 }
 
 func TestInvocation_ReadJsonPayload_ErrorHandling(t *testing.T) {
+	t.Parallel()
 	request := buildRequestWithBody(t, []byte(`{"invalid json"}`))
 	testState := NewTestingMock(t)
 	invocation := newInvocation(request, testState)

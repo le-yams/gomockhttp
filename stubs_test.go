@@ -9,6 +9,7 @@ import (
 )
 
 func TestApiNotStubbedEndpoint(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -26,6 +27,7 @@ func TestApiNotStubbedEndpoint(t *testing.T) {
 }
 
 func TestApiStubbedEndpoint(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -35,7 +37,7 @@ func TestApiStubbedEndpoint(t *testing.T) {
 		Stub(http.MethodGet, "/endpoint").
 		With(func(writer http.ResponseWriter, request *http.Request) {
 			writer.Header().Add("Content-Type", "text/plain")
-			writer.WriteHeader(201)
+			writer.WriteHeader(http.StatusCreated)
 			_, err := writer.Write([]byte("Hello"))
 			if err != nil {
 				t.Fatal(err)
@@ -55,6 +57,7 @@ func TestApiStubbedEndpoint(t *testing.T) {
 }
 
 func TestApiStubbedEndpointWithJson(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -78,8 +81,4 @@ func TestApiStubbedEndpointWithJson(t *testing.T) {
 		JSON().Object()
 
 	responseObject.Value("value").IsEqual("Hello")
-}
-
-type TestDto struct {
-	Value string `json:"value"`
 }

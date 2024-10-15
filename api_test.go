@@ -62,6 +62,7 @@ func (testState *MockT) assertFailedWithFatal() {
 }
 
 func TestApiUrl(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	mockedAPI := API(NewTestingMock(t))
 	defer func() { mockedAPI.Close() }()

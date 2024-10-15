@@ -9,6 +9,7 @@ import (
 )
 
 func TestVerifyingInvocationsCountPasses(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -31,6 +32,7 @@ func TestVerifyingInvocationsCountPasses(t *testing.T) {
 }
 
 func TestVerifyingInvocationsCountFails(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -53,6 +55,7 @@ func TestVerifyingInvocationsCountFails(t *testing.T) {
 }
 
 func TestVerifyingInvocationsCountReturnsThePerformedCalls(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -90,6 +93,7 @@ func TestVerifyingInvocationsCountReturnsThePerformedCalls(t *testing.T) {
 }
 
 func TestVerifyingSingleInvocationPasses(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -109,6 +113,7 @@ func TestVerifyingSingleInvocationPasses(t *testing.T) {
 }
 
 func TestVerifyingSingleInvocationFails(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -129,6 +134,7 @@ func TestVerifyingSingleInvocationFails(t *testing.T) {
 }
 
 func TestVerifyingSingleInvocationReturnsThePerformedCall(t *testing.T) {
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
