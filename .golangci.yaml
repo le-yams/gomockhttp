@@ -1,0 +1,45 @@
+
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - errcheck
+    - errorlint
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - loggercheck
+    - makezero
+    - musttag
+    - noctx
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - predeclared
+    - reassign
+    - staticcheck
+    - tenv
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+
+
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - bodyclose
+        - gosec
+        - noctx
+        - wrapcheck

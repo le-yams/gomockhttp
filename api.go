@@ -52,7 +52,7 @@ func API(testState TestingT) *APIMock {
 		if handler != nil {
 			handler(res, request)
 		} else {
-			res.WriteHeader(404)
+			res.WriteHeader(http.StatusNotFound)
 			testState.Fatalf("unmocked invocation %s %s\n", call.Method, call.Path)
 		}
 	}))
