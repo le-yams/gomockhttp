@@ -23,15 +23,19 @@ func (stub *StubBuilder) WithStatusCode(statusCode int) *APIMock {
 }
 
 func (stub *StubBuilder) WithJSON(statusCode int, content interface{}) *APIMock {
-	return stub.With(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Add("Content-Type", "application/json")
-		writer.WriteHeader(statusCode)
+	body, err := json.Marshal(content)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		bytes, err := json.Marshal(content)
-		if err != nil {
-			log.Fatal(err)
-		}
-		_, err = writer.Write(bytes)
+	return stub.WithBody(statusCode, body, "application/json")
+}
+
+func (stub *StubBuilder) WithBody(statusCode int, body []byte, contentType string) *APIMock {
+	return stub.With(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Add("Content-Type", contentType)
+		writer.WriteHeader(statusCode)
+		_, err := writer.Write(body)
 		if err != nil {
 			log.Fatal(err)
 		}
