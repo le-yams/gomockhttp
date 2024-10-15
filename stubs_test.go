@@ -75,10 +75,42 @@ func TestApiStubbedEndpointWithJson(t *testing.T) {
 	// Assert
 	testState.assertDidNotFailed()
 
+	e.GET("/endpoint").
+		Expect().
+		Header("Content-Type").IsEqual("application/json")
+
 	responseObject := e.GET("/endpoint").
 		Expect().
 		Status(http.StatusOK).
 		JSON().Object()
 
 	responseObject.Value("value").IsEqual("Hello")
+}
+
+func TestApiStubbedEndpointWithBody(t *testing.T) {
+    t.Parallel()
+	// Arrange
+	testState := NewTestingMock(t)
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
+	body := []byte("Hello!")
+
+	mockedAPI.
+		Stub(http.MethodGet, "/endpoint").
+		WithBody(http.StatusOK, body, "text/plain")
+
+	// Act
+	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+
+	// Assert
+	testState.assertDidNotFailed()
+
+	e.GET("/endpoint").
+		Expect().
+		Header("Content-Type").IsEqual("text/plain")
+
+	e.GET("/endpoint").
+		Expect().
+		Status(http.StatusOK).
+		Body().IsEqual("Hello!")
 }
