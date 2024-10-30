@@ -211,6 +211,104 @@ func TestInvocation_ReadJsonPayload_ErrorHandling(t *testing.T) {
 	testState.assertFailedWithFatal()
 }
 
+func TestInvocation_WithUrlEncodedForm_Fail(t *testing.T) {
+	t.Parallel()
+	request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithUrlEncodedFormPayload()
+	testState.assertFailedWithError()
+}
+
+func TestInvocation_WithUrlEncodedForm_Values_Pass(t *testing.T) {
+	t.Parallel()
+
+	testCases := []map[string]string{
+		{"key1": "value1"},
+		{"key1": "value1", "key2": "value 2!"},
+	}
+
+	for i := range testCases {
+		values := testCases[i]
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
+			request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithUrlEncodedFormPayload().WithValues(values)
+
+			testState.assertDidNotFailed()
+		})
+	}
+}
+
+func TestInvocation_WithUrlEncodedForm_Values_Fail(t *testing.T) {
+	t.Parallel()
+
+	testCases := []map[string]string{
+		{"key1": "not value1"},
+		{"not_key1": "value1"},
+	}
+
+	for i := range testCases {
+		values := testCases[i]
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
+			request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithUrlEncodedFormPayload().WithValues(values)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
+func TestInvocation_WithUrlEncodedForm_ValuesExactly_Pass(t *testing.T) {
+	t.Parallel()
+	request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+	invocation.
+		WithUrlEncodedFormPayload().
+		WithValuesExactly(map[string]string{"key1": "value1", "key2": "value 2!"})
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithUrlEncodedForm_ValuesExactly_Fail(t *testing.T) {
+	t.Parallel()
+
+	testCases := []map[string]string{
+		{"key1": "value1"},
+		{"key1": "not value1"},
+		{"not_key1": "value1"},
+	}
+
+	for i := range testCases {
+		values := testCases[i]
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
+			request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithUrlEncodedFormPayload().WithValuesExactly(values)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
 func buildRequest(t *testing.T, method string, url string, data []byte) *http.Request {
 	request, err := http.NewRequest(method, url, bytes.NewReader(data))
 	if err != nil {
