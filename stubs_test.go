@@ -3,10 +3,15 @@ package mockhttp
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	assertions "github.com/stretchr/testify/assert"
 )
+
+func (mockedAPI *APIMock) testCall(method, path string, t *testing.T) *httpexpect.Response {
+	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+	return e.Request(method, path).Expect()
+}
 
 func TestApiNotStubbedEndpoint(t *testing.T) {
 	t.Parallel()
@@ -16,14 +21,11 @@ func TestApiNotStubbedEndpoint(t *testing.T) {
 	defer func() { mockedAPI.Close() }()
 
 	// Act
-	client := http.Client{}
-	response, err := client.Get(mockedAPI.GetURL().String() + "/endpoint")
+	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
 	// Assert
-	assert := assertions.New(t)
-	assert.NoError(err)
 	testState.assertFailedWithFatal()
-	assert.Equal(404, response.StatusCode)
+	call.Status(http.StatusNotFound)
 }
 
 func TestApiStubbedEndpoint(t *testing.T) {
@@ -45,11 +47,10 @@ func TestApiStubbedEndpoint(t *testing.T) {
 		})
 
 	// Act
-	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
 	// Assert
-	e.GET("/endpoint").
-		Expect().
+	call.
 		Status(http.StatusCreated).
 		Body().IsEqual("Hello")
 
@@ -70,17 +71,14 @@ func TestApiStubbedEndpointWithJson(t *testing.T) {
 		}{Value: "Hello"})
 
 	// Act
-	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
 	// Assert
 	testState.assertDidNotFailed()
 
-	e.GET("/endpoint").
-		Expect().
-		Header("Content-Type").IsEqual("application/json")
+	call.Header("Content-Type").IsEqual("application/json")
 
-	responseObject := e.GET("/endpoint").
-		Expect().
+	responseObject := call.
 		Status(http.StatusOK).
 		JSON().Object()
 
@@ -88,7 +86,7 @@ func TestApiStubbedEndpointWithJson(t *testing.T) {
 }
 
 func TestApiStubbedEndpointWithBody(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 	// Arrange
 	testState := NewTestingMock(t)
 	mockedAPI := API(testState)
@@ -100,17 +98,36 @@ func TestApiStubbedEndpointWithBody(t *testing.T) {
 		WithBody(http.StatusOK, body, "text/plain")
 
 	// Act
-	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
 	// Assert
 	testState.assertDidNotFailed()
 
-	e.GET("/endpoint").
-		Expect().
-		Header("Content-Type").IsEqual("text/plain")
+	call.Header("Content-Type").IsEqual("text/plain")
 
-	e.GET("/endpoint").
-		Expect().
+	call.
 		Status(http.StatusOK).
 		Body().IsEqual("Hello!")
+}
+
+func TestApiStubbedEndpointWithDelay(t *testing.T) {
+	t.Parallel()
+	// Arrange
+	testState := NewTestingMock(t)
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
+
+	stubbedDelay := 500 * time.Millisecond
+
+	mockedAPI.
+		Stub(http.MethodPost, "/delayed").
+		WithDelay(stubbedDelay).
+		WithStatusCode(http.StatusOK)
+
+	// Act
+	call := mockedAPI.testCall(http.MethodPost, "/delayed", t)
+
+	// Assert
+	testState.assertDidNotFailed()
+	call.RoundTripTime().Ge(stubbedDelay)
 }

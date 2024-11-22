@@ -4,16 +4,30 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type StubBuilder struct {
-	api  *APIMock
-	call *HTTPCall
+	api   *APIMock
+	call  *HTTPCall
+	delay time.Duration
 }
 
 func (stub *StubBuilder) With(handler http.HandlerFunc) *APIMock {
-	stub.api.calls[*stub.call] = handler
+	if stub.delay > 0 {
+		stub.api.calls[*stub.call] = func(writer http.ResponseWriter, request *http.Request) {
+			time.Sleep(stub.delay)
+			handler(writer, request)
+		}
+	} else {
+		stub.api.calls[*stub.call] = handler
+	}
 	return stub.api
+}
+
+func (stub *StubBuilder) WithDelay(delay time.Duration) *StubBuilder {
+	stub.delay = delay
+	return stub
 }
 
 func (stub *StubBuilder) WithStatusCode(statusCode int) *APIMock {
