@@ -155,3 +155,41 @@ func TestVerifyingSingleInvocationReturnsThePerformedCall(t *testing.T) {
 		WithStringPayload("Hello").
 		WithHeader("Content-Type", "text/plain")
 }
+
+func TestVerifyingNoInvocationPasses(t *testing.T) {
+	t.Parallel()
+	// Arrange
+	testState := NewTestingMock(t)
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
+
+	mockedAPI.
+		Stub(http.MethodGet, "/endpoint").
+		WithStatusCode(http.StatusOK)
+
+	// Act
+	mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+
+	// Assert
+	testState.assertDidNotFailed()
+}
+
+func TestVerifyingNoInvocationFails(t *testing.T) {
+	t.Parallel()
+	// Arrange
+	testState := NewTestingMock(t)
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
+
+	mockedAPI.
+		Stub(http.MethodGet, "/endpoint").
+		WithStatusCode(http.StatusOK)
+
+	// Act
+	client := http.Client{}
+	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+	mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+
+	// Assert
+	testState.assertFailedWithFatal()
+}
