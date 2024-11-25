@@ -1,10 +1,13 @@
 package mockhttp
 
+// CallVerifier is a helper to verify invocations of a specific HTTP call
 type CallVerifier struct {
 	api  *APIMock
 	call *HTTPCall
 }
 
+// HasBeenCalled asserts that the HTTP call has been made the expected number of times.
+// It returns all invocations of the call.
 func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) []*Invocation {
 	invocations := verifier.api.invocations[*verifier.call]
 	actualCallsCount := len(invocations)
@@ -14,6 +17,7 @@ func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) []*Invocatio
 	return invocations
 }
 
+// HasBeenCalledOnce asserts that the HTTP call has been made exactly once then returns the invocation.
 func (verifier *CallVerifier) HasBeenCalledOnce() *Invocation {
 	return verifier.HasBeenCalled(1)[0]
 }

@@ -16,6 +16,7 @@ type TestingT interface {
 	Fatalf(format string, args ...any)
 }
 
+// APIMock is a representation of a mocked API. It allows to stub HTTP calls and verify invocations.
 type APIMock struct {
 	testServer  *httptest.Server
 	calls       map[HTTPCall]http.HandlerFunc
@@ -24,11 +25,13 @@ type APIMock struct {
 	mu          sync.Mutex
 }
 
+// HTTPCall is a simple representation of an endpoint call.
 type HTTPCall struct {
 	Method string
 	Path   string
 }
 
+// API creates a new APIMock instance and starts a server exposing it.
 func API(testState TestingT) *APIMock {
 	mockedAPI := &APIMock{
 		calls:       map[HTTPCall]http.HandlerFunc{},
@@ -61,10 +64,12 @@ func API(testState TestingT) *APIMock {
 	return mockedAPI
 }
 
+// Close stops the underlying server.
 func (mockedAPI *APIMock) Close() {
 	mockedAPI.testServer.Close()
 }
 
+// GetURL returns the URL of the API underlying server.
 func (mockedAPI *APIMock) GetURL() *url.URL {
 	testServerURL, err := url.Parse(mockedAPI.testServer.URL)
 	if err != nil {
@@ -73,10 +78,12 @@ func (mockedAPI *APIMock) GetURL() *url.URL {
 	return testServerURL
 }
 
+// GetHost returns the host of the API underlying server.
 func (mockedAPI *APIMock) GetHost() string {
 	return mockedAPI.GetURL().Host
 }
 
+// Stub creates a new StubBuilder instance for the given method and path.
 func (mockedAPI *APIMock) Stub(method string, path string) *StubBuilder {
 	return &StubBuilder{
 		api: mockedAPI,
@@ -87,6 +94,7 @@ func (mockedAPI *APIMock) Stub(method string, path string) *StubBuilder {
 	}
 }
 
+// Verify creates a new CallVerifier instance for the given method and path.
 func (mockedAPI *APIMock) Verify(method string, path string) *CallVerifier {
 	return &CallVerifier{
 		api: mockedAPI,
