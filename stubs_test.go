@@ -13,6 +13,11 @@ func (mockedAPI *APIMock) testCall(method, path string, t *testing.T) *httpexpec
 	return e.Request(method, path).Expect()
 }
 
+func (mockedAPI *APIMock) testCallWithQuery(method, path string, queryObject any, t *testing.T) *httpexpect.Response {
+	e := httpexpect.Default(t, mockedAPI.GetURL().String())
+	return e.Request(method, path).WithQueryObject(queryObject).Expect()
+}
+
 func TestApiNotStubbedEndpoint(t *testing.T) {
 	t.Parallel()
 	// Arrange
@@ -53,6 +58,38 @@ func TestApiStubbedEndpoint(t *testing.T) {
 	call.
 		Status(http.StatusCreated).
 		Body().IsEqual("Hello")
+
+	testState.assertDidNotFailed()
+}
+
+func TestApiStubbedEndpointWithQuery(t *testing.T) {
+	t.Parallel()
+	// Arrange
+	testState := NewTestingMock(t)
+	mockedAPI := API(testState)
+	defer func() { mockedAPI.Close() }()
+
+	mockedAPI.
+		Stub(http.MethodGet, "/endpoint").
+		With(func(writer http.ResponseWriter, request *http.Request) {
+			name := request.FormValue("name")
+			writer.Header().Add("Content-Type", "text/plain")
+			writer.WriteHeader(http.StatusCreated)
+			_, err := writer.Write([]byte("Hello " + name))
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+
+	query := map[string]any{"name": "John"}
+
+	// Act
+	call := mockedAPI.testCallWithQuery(http.MethodGet, "/endpoint", query, t)
+
+	// Assert
+	call.
+		Status(http.StatusCreated).
+		Body().IsEqual("Hello John")
 
 	testState.assertDidNotFailed()
 }

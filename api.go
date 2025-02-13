@@ -42,7 +42,7 @@ func API(testState TestingT) *APIMock {
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, request *http.Request) {
 		call := HTTPCall{
 			Method: strings.ToLower(request.Method),
-			Path:   request.RequestURI,
+			Path:   request.URL.Path,
 		}
 
 		mockedAPI.mu.Lock()
