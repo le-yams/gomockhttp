@@ -115,3 +115,7 @@ func (form InvocationRequestForm) WithValuesExactly(expectedValues map[string]st
 		assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
 	}
 }
+
+func (form InvocationRequestForm) Get(s string) string {
+	return form.formValues.Get(s)
+}
