@@ -3,11 +3,10 @@ package mockhttp
 import (
 	"bytes"
 	"encoding/json"
+	assertions "github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/url"
-
-	assertions "github.com/stretchr/testify/assert"
 )
 
 // Invocation represents a single HTTP request made to the mock server.
@@ -93,6 +92,49 @@ func (call *Invocation) WithUrlEncodedFormPayload() *InvocationRequestForm {
 		invocation: call.WithHeader("Content-Type", "application/x-www-form-urlencoded"),
 		formValues: formValues,
 	}
+}
+
+func (call *Invocation) WithQueryValue(name string, value string) *Invocation {
+	query := call.request.URL.Query()
+	if query.Has(name) {
+		assertions.Equal(call.testState, value, query.Get(name))
+	} else {
+		call.testState.Errorf("query parameter '%s' not found", name)
+	}
+	return call
+}
+
+func (call *Invocation) WithQueryValues(values map[string]string) *Invocation {
+	query := call.request.URL.Query()
+	for key, value := range values {
+		if query.Has(key) {
+			assertions.Equal(call.testState, value, query.Get(key))
+		} else {
+			call.testState.Errorf("query parameter '%s' not found", key)
+		}
+	}
+	return call
+}
+
+func (call *Invocation) WithQueryValuesExactly(values map[string]string) *Invocation {
+	query := call.request.URL.Query()
+	for key, value := range values {
+		if query.Has(key) {
+			assertions.Equal(call.testState, value, query.Get(key))
+		} else {
+			call.testState.Errorf("query parameter '%s' not found", key)
+		}
+	}
+
+	if len(query) > len(values) {
+		for key := range query {
+			if _, ok := values[key]; !ok {
+				call.testState.Errorf("query parameter '%s' not expected", key)
+			}
+		}
+	}
+
+	return call
 }
 
 // InvocationRequestForm represents a form payload of an HTTP request made to the mock server.

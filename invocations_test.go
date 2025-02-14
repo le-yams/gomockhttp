@@ -394,6 +394,144 @@ func TestInvocation_WithUrlEncodedForm_Chainable_Methods(t *testing.T) {
 	testState.assertDidNotFailed()
 }
 
+func TestInvocation_WithQueryValue_Pass(t *testing.T) {
+	t.Parallel()
+	value := "value !"
+	request := buildRequestWithURL(t, "/endpoint?foo=bar&bar=foo&value="+url.QueryEscape(value))
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.
+		WithQueryValue("foo", "bar").
+		WithQueryValue("bar", "foo").
+		WithQueryValue("value", value)
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithQueryValue_Fail(t *testing.T) {
+	t.Parallel()
+
+	key := "foo"
+	value := "bar"
+	useCases := []struct {
+		name  string
+		key   string
+		value string
+	}{
+		{"not the expected value", key, "not" + value},
+		{"key not present", "not" + key, value},
+	}
+	request := buildRequestWithURL(t, "/endpoint?foo=bar")
+
+	for i := range useCases {
+		useCase := useCases[i]
+		t.Run(useCase.name, func(t *testing.T) {
+			t.Parallel()
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithQueryValue(useCase.key, useCase.value)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
+func TestInvocation_WithQueryValues_Pass(t *testing.T) {
+	t.Parallel()
+	value := "value !"
+	request := buildRequestWithURL(t, "/endpoint?foo=bar&bar=foo&value="+url.QueryEscape(value))
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.
+		WithQueryValues(map[string]string{
+			"foo":   "bar",
+			"value": value,
+		})
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithQueryValues_Fail(t *testing.T) {
+	t.Parallel()
+
+	values := map[string]string{
+		"foo": "bar",
+	}
+	useCases := []struct {
+		name string
+		url  string
+	}{
+		{"not the expected value", "/endpoint?foo=notbar"},
+		{"key not present", "/endpoint?notfoo=bar"},
+	}
+
+	for i := range useCases {
+		useCase := useCases[i]
+		t.Run(useCase.name, func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithURL(t, useCase.url)
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithQueryValues(values)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
+func TestInvocation_WithQueryValuesExactly_Pass(t *testing.T) {
+	t.Parallel()
+	value := "value !"
+	request := buildRequestWithURL(t, "/endpoint?foo=bar&value="+url.QueryEscape(value))
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.
+		WithQueryValuesExactly(map[string]string{
+			"foo":   "bar",
+			"value": value,
+		})
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithQueryValuesExactly_Fail(t *testing.T) {
+	t.Parallel()
+
+	values := map[string]string{
+		"foo": "bar",
+	}
+	useCases := []struct {
+		name string
+		url  string
+	}{
+		{"not the expected value", "/endpoint?foo=notbar"},
+		{"key not present", "/endpoint?notfoo=bar"},
+		{"key present but not expected", "/endpoint?foo=bar&bar=foo"},
+	}
+
+	for i := range useCases {
+		useCase := useCases[i]
+		t.Run(useCase.name, func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithURL(t, useCase.url)
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithQueryValuesExactly(values)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
 func buildRequest(t *testing.T, method string, url string, data []byte) *http.Request {
 	request, err := http.NewRequest(method, url, bytes.NewReader(data))
 	if err != nil {
@@ -404,6 +542,14 @@ func buildRequest(t *testing.T, method string, url string, data []byte) *http.Re
 
 func buildRequestWithBody(t *testing.T, data []byte) *http.Request {
 	request, err := http.NewRequest("dummy", "dummy", bytes.NewReader(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return request
+}
+
+func buildRequestWithURL(t *testing.T, url string) *http.Request {
+	request, err := http.NewRequest("dummy", url, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
