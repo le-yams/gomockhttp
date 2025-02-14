@@ -102,20 +102,27 @@ type InvocationRequestForm struct {
 }
 
 // WithValues asserts that the form contains at least the specified values
-func (form InvocationRequestForm) WithValues(expectedValues map[string]string) {
+func (form InvocationRequestForm) WithValues(expectedValues map[string]string) InvocationRequestForm {
 	for key, value := range expectedValues {
 		assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
 	}
+	return form
 }
 
 // WithValuesExactly asserts that the form contains exactly the specified values
-func (form InvocationRequestForm) WithValuesExactly(expectedValues map[string]string) {
+func (form InvocationRequestForm) WithValuesExactly(expectedValues map[string]string) InvocationRequestForm {
 	assertions.Equal(form.invocation.testState, len(expectedValues), len(form.formValues))
 	for key, value := range expectedValues {
 		assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
 	}
+	return form
 }
 
 func (form InvocationRequestForm) Get(s string) string {
 	return form.formValues.Get(s)
+}
+
+func (form InvocationRequestForm) WithValue(key string, value string) InvocationRequestForm {
+	assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
+	return form
 }
