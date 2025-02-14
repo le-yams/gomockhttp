@@ -3,6 +3,7 @@ package mockhttp
 import (
 	"bytes"
 	"net/http"
+	"net/url"
 	"testing"
 
 	assertions "github.com/stretchr/testify/assert"
@@ -220,6 +221,26 @@ func TestInvocation_WithUrlEncodedForm_Fail(t *testing.T) {
 
 	invocation.WithUrlEncodedFormPayload()
 	testState.assertFailedWithError()
+}
+
+func TestInvocation_WithUrlEncodedForm_Get(t *testing.T) {
+	t.Parallel()
+
+	// Arrange
+	expectedValue2 := "value 2!"
+	request := buildRequestWithBody(t, []byte("key1=value1&key2="+url.QueryEscape(expectedValue2)))
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	// Act
+	requestFormPayload := invocation.WithUrlEncodedFormPayload()
+
+	// Assert
+	assert := assertions.New(t)
+	assert.Equal("value1", requestFormPayload.Get("key1"))
+	assert.Equal(expectedValue2, requestFormPayload.Get("key2"))
+
 }
 
 func TestInvocation_WithUrlEncodedForm_Values_Pass(t *testing.T) {
