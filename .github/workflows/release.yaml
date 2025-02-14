@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, ci/release ]
 
 jobs:
 
@@ -15,6 +15,6 @@ jobs:
         id: release
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
-          target-branch: main
+          target-branch: ci/release
           config-file: .release/release-please-config.json
           manifest-file: .release/release-please-manifest.json
