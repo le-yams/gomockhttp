@@ -240,7 +240,6 @@ func TestInvocation_WithUrlEncodedForm_Get(t *testing.T) {
 	assert := assertions.New(t)
 	assert.Equal("value1", requestFormPayload.Get("key1"))
 	assert.Equal(expectedValue2, requestFormPayload.Get("key2"))
-
 }
 
 func TestInvocation_WithUrlEncodedForm_Values_Pass(t *testing.T) {
@@ -328,6 +327,71 @@ func TestInvocation_WithUrlEncodedForm_ValuesExactly_Fail(t *testing.T) {
 			testState.assertFailedWithError()
 		})
 	}
+}
+
+func TestInvocation_WithUrlEncodedForm_Value_Pass(t *testing.T) {
+	t.Parallel()
+	expectedValue2 := "value 2!"
+	request := buildRequestWithBody(t, []byte("key1=value1&key2="+url.QueryEscape(expectedValue2)))
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithUrlEncodedFormPayload().
+		WithValue("key1", "value1").
+		WithValue("key2", expectedValue2)
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithUrlEncodedForm_Value_Fail(t *testing.T) {
+	t.Parallel()
+
+	key := "k"
+	value := "v"
+	testCases := []map[string]string{
+		{key: "not" + value},
+		{"not" + key: value},
+	}
+
+	for i := range testCases {
+		values := testCases[i]
+		body := ""
+		for k, v := range values {
+			if body != "" {
+				body += "&"
+			}
+			body += k + "=" + v
+		}
+
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte(body))
+			request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+
+			invocation.WithUrlEncodedFormPayload().WithValue(key, value)
+
+			testState.assertFailedWithError()
+		})
+	}
+}
+
+func TestInvocation_WithUrlEncodedForm_Chainable_Methods(t *testing.T) {
+	t.Parallel()
+	expectedValue2 := "value 2!"
+	request := buildRequestWithBody(t, []byte("key1=value1&key2="+url.QueryEscape(expectedValue2)))
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	_ = invocation.WithUrlEncodedFormPayload().
+		WithValues(map[string]string{"key1": "value1"}).
+		WithValue("key2", expectedValue2).
+		Get("key1")
+
+	testState.assertDidNotFailed()
 }
 
 func buildRequest(t *testing.T, method string, url string, data []byte) *http.Request {
