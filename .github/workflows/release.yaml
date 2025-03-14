@@ -22,3 +22,5 @@ jobs:
           target-branch: master
           config-file: .release/release-please-config.json
           manifest-file: .release/release-please-manifest.json
+      - name: Refresh Go Report Card
+        uses: creekorful/goreportcard-action@v1.0
