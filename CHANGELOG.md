@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.1](https://github.com/le-yams/gomockhttp/compare/v1.0.0...v1.0.1) (2025-03-18)
+
+
+### Bug Fixes
+
+* dependencies ([0620488](https://github.com/le-yams/gomockhttp/commit/0620488ee4064dd2326a5d10d0196d9f2220c220))
+
+
+### Docs
+
+* add fossa badges ([01a3168](https://github.com/le-yams/gomockhttp/commit/01a3168322d6fa822de92e1eee41679dd39c4856))
+
 ## [1.0.0](https://github.com/le-yams/gomockhttp/compare/v0.5.1...v1.0.0) (2025-02-14)
 
 
