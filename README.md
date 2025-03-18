@@ -1,8 +1,11 @@
 # gomockhttp 
+[![Version](https://img.shields.io/github/tag/le-yams/gomockhttp.svg)](https://github.com/le-yams/gomockhttp/releases)
 [![Coverage Status](https://coveralls.io/repos/github/le-yams/gomockhttp/badge.svg?branch=master)](https://coveralls.io/github/le-yams/gomockhttp?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/le-yams/gomockhttp)](https://goreportcard.com/report/github.com/le-yams/gomockhttp)
 [![GoDoc](https://godoc.org/github.com/le-yams/gomockhttp?status.svg)](https://godoc.org/github.com/le-yams/gomockhttp)
-[![Version](https://img.shields.io/github/tag/le-yams/gomockhttp.svg)](https://github.com/le-yams/gomockhttp/releases)
+[![License](https://img.shields.io/github/license/le-yams/gomockhttp)](LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fle-yams%2Fgomockhttp.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fle-yams%2Fgomockhttp?ref=badge_shield&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fle-yams%2Fgomockhttp.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fle-yams%2Fgomockhttp?ref=badge_shield&issueType=security)
 
 
 A fluent testing library for mocking http apis.
