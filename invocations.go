@@ -99,16 +99,19 @@ func (call *Invocation) ReadJSONPayload(obj any) {
 
 // WithUrlEncodedFormPayload assert that the invocation content type is application/x-www-form-urlencoded then returns
 // the form to be asserted.
-func (call *Invocation) WithUrlEncodedFormPayload() *InvocationRequestForm {
+func (call *Invocation) WithUrlEncodedFormPayload() InvocationRequestForm {
 	formValues, err := url.ParseQuery(string(call.GetPayload()))
+	form := InvocationRequestForm{
+		testState: call.testState,
+	}
 	if err != nil {
-		call.testState.Fatal(err)
-		return nil
+		call.testState.Error(err)
+		return form
 	}
-	return &InvocationRequestForm{
-		invocation: call.WithHeader("Content-Type", "application/x-www-form-urlencoded"),
-		formValues: formValues,
-	}
+	form.invocation = call.WithHeader("Content-Type", "application/x-www-form-urlencoded")
+	form.formValues = formValues
+
+	return form
 }
 
 func (call *Invocation) WithQueryValue(name string, value string) *Invocation {
@@ -156,23 +159,32 @@ func (call *Invocation) WithQueryValuesExactly(values map[string]string) *Invoca
 
 // InvocationRequestForm represents a form payload of an HTTP request made to the mock server.
 type InvocationRequestForm struct {
+	testState  TestingT
 	invocation *Invocation
 	formValues url.Values
 }
 
 // WithValues asserts that the form contains at least the specified values
 func (form InvocationRequestForm) WithValues(expectedValues map[string]string) InvocationRequestForm {
+	if form.invocation == nil {
+		form.testState.Error("not a form urlencoded request")
+		return form
+	}
 	for key, value := range expectedValues {
-		assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
+		assertions.Equal(form.testState, value, form.formValues.Get(key))
 	}
 	return form
 }
 
 // WithValuesExactly asserts that the form contains exactly the specified values
 func (form InvocationRequestForm) WithValuesExactly(expectedValues map[string]string) InvocationRequestForm {
-	assertions.Equal(form.invocation.testState, len(expectedValues), len(form.formValues))
+	if form.invocation == nil {
+		form.testState.Error("not a form urlencoded request")
+		return form
+	}
+	assertions.Equal(form.testState, len(expectedValues), len(form.formValues))
 	for key, value := range expectedValues {
-		assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
+		assertions.Equal(form.testState, value, form.formValues.Get(key))
 	}
 	return form
 }
@@ -182,6 +194,10 @@ func (form InvocationRequestForm) Get(s string) string {
 }
 
 func (form InvocationRequestForm) WithValue(key string, value string) InvocationRequestForm {
-	assertions.Equal(form.invocation.testState, value, form.formValues.Get(key))
+	if form.invocation == nil {
+		form.testState.Error("not a form urlencoded request")
+		return form
+	}
+	assertions.Equal(form.testState, value, form.formValues.Get(key))
 	return form
 }
