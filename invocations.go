@@ -2,11 +2,13 @@ package mockhttp
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	assertions "github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/url"
+
+	assertions "github.com/stretchr/testify/assert"
 )
 
 // Invocation represents a single HTTP request made to the mock server.
@@ -58,6 +60,21 @@ func (call *Invocation) WithoutHeader(name string) *Invocation {
 		call.testState.Errorf("header '%s' found where it was expected not to")
 	}
 	return call
+}
+
+// WithAuthHeader asserts that the invocation request contains the specified auth header
+func (call *Invocation) WithAuthHeader(scheme string, value string) {
+	call.WithHeader("Authorization", scheme+" "+value)
+}
+
+// WithBasicAuthHeader asserts that the invocation request contains the specified basic auth header
+func (call *Invocation) WithBasicAuthHeader(username string, password string) {
+	call.WithAuthHeader("Basic", base64.StdEncoding.EncodeToString([]byte(username+":"+password)))
+}
+
+// WithBearerAuthHeader asserts that the invocation request contains the specified bearer auth header
+func (call *Invocation) WithBearerAuthHeader(token string) {
+	call.WithAuthHeader("Bearer", token)
 }
 
 // WithPayload asserts that the invocation request contains the specified payload

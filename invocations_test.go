@@ -128,6 +128,97 @@ func TestInvocation_WithoutHeader_Fail(t *testing.T) {
 	testState.assertFailedWithError()
 }
 
+func TestInvocation_WithAuthHeader_Pass(t *testing.T) {
+	t.Parallel()
+	scheme := "foo"
+	value := "bar"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+	request.Header.Add("Authorization", scheme+" "+value)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithAuthHeader(scheme, value)
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithAuthHeader_Fail(t *testing.T) {
+	t.Parallel()
+	scheme := "foo"
+	value := "bar"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithAuthHeader(scheme, value)
+
+	testState.assertFailedWithError()
+}
+
+func TestInvocation_WithBasicAuthHeader_Pass(t *testing.T) {
+	t.Parallel()
+	username := "foo"
+	password := "bar"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+	request.SetBasicAuth(username, password)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithBasicAuthHeader(username, password)
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithBasicAuthHeader_Fail(t *testing.T) {
+	t.Parallel()
+	username := "foo"
+	password := "bar"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithBasicAuthHeader(username, password)
+
+	testState.assertFailedWithError()
+}
+
+func TestInvocation_WithBearerAuthHeader_Pass(t *testing.T) {
+	t.Parallel()
+	token := "foo"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+	request.Header.Add("Authorization", "Bearer "+token)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithBearerAuthHeader(token)
+
+	testState.assertDidNotFailed()
+}
+
+func TestInvocation_WithBearerAuthHeader_Fail(t *testing.T) {
+	t.Parallel()
+	token := "foo"
+
+	request := buildRequest(t, http.MethodGet, "/endpoint", nil)
+
+	testState := NewTestingMock(t)
+	invocation := newInvocation(request, testState)
+
+	invocation.WithBearerAuthHeader(token)
+
+	testState.assertFailedWithError()
+}
+
 func TestInvocation_WithPayload_Pass(t *testing.T) {
 	t.Parallel()
 	testState := NewTestingMock(t)
