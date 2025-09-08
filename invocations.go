@@ -57,7 +57,7 @@ func (call *Invocation) WithHeader(name string, expectedValues ...string) *Invoc
 // WithoutHeader asserts that the invocation request does not contain the specified header
 func (call *Invocation) WithoutHeader(name string) *Invocation {
 	if call.request.Header.Values(name) != nil {
-		call.testState.Errorf("header '%s' found where it was expected not to")
+		call.testState.Errorf("header '%s' found where it was expected not to", name)
 	}
 	return call
 }
