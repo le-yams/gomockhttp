@@ -8,188 +8,221 @@ import (
 	assertions "github.com/stretchr/testify/assert"
 )
 
-func TestVerifyingInvocationsCountPasses(t *testing.T) {
+func Test_Verify_Endpoint(t *testing.T) {
 	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithJSON(http.StatusOK, struct {
-			Value string `json:"value"`
-		}{Value: "Hello"})
+	t.Run("HasBeenCalled()", func(t *testing.T) {
+		t.Parallel()
 
-	// Act
-	client := http.Client{}
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(2)
+		t.Run("passes when the endpoint was called the expected number of times", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-	// Assert
-	testState.assertDidNotFailed()
-}
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithJSON(http.StatusOK, struct {
+					Value string `json:"value"`
+				}{Value: "Hello"})
 
-func TestVerifyingInvocationsCountFails(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+			// Act
+			client := http.Client{}
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(2)
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithJSON(http.StatusOK, struct {
-			Value string `json:"value"`
-		}{Value: "Hello"})
+			// Assert
+			testState.assertDidNotFailed()
+		})
 
-	// Act
-	client := http.Client{}
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(3)
+		t.Run("fails when the endpoint was not called the expected number of times", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-	// Assert
-	testState.assertFailedWithFatal()
-}
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithJSON(http.StatusOK, struct {
+					Value string `json:"value"`
+				}{Value: "Hello"})
 
-func TestVerifyingInvocationsCountReturnsThePerformedCalls(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+			// Act
+			client := http.Client{}
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(3)
 
-	endpoint := "/endpoint"
-	endpointURL := mockedAPI.GetURL().String() + endpoint
-	mockedAPI.
-		Stub(http.MethodPost, endpoint).
-		WithStatusCode(http.StatusOK)
-	client := http.Client{}
-	_, _ = client.Post(endpointURL, "application/json", bytes.NewBuffer([]byte(`{"foo": "bar"}`)))
-	_, _ = client.Post(endpointURL, "text/plain", bytes.NewBuffer([]byte("Hello")))
+			// Assert
+			testState.assertFailedWithFatal()
+		})
 
-	// Act
-	calls := mockedAPI.Verify(http.MethodPost, endpoint).HasBeenCalled(2)
+		t.Run("returns the performed calls", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-	// Assert
-	testState.assertDidNotFailed()
-	assert := assertions.New(t)
-	assert.Len(calls, 2)
+			endpoint := "/endpoint"
+			endpointURL := mockedAPI.GetURL().String() + endpoint
+			mockedAPI.
+				Stub(http.MethodPost, endpoint).
+				WithStatusCode(http.StatusOK)
+			client := http.Client{}
+			_, _ = client.Post(endpointURL, "application/json", bytes.NewBuffer([]byte(`{"foo": "bar"}`)))
+			_, _ = client.Post(endpointURL, "text/plain", bytes.NewBuffer([]byte("Hello")))
 
-	call1 := calls[0]
-	assert.Equal("application/json", call1.GetRequest().Header.Get("Content-Type"))
-	call1Content := struct {
-		Foo string `json:"foo"`
-	}{}
-	call1.ReadJSONPayload(&call1Content)
-	assert.Equal("bar", call1Content.Foo)
+			// Act
+			calls := mockedAPI.Verify(http.MethodPost, endpoint).HasBeenCalled(2)
 
-	call2 := calls[1]
-	call2.
-		WithHeader("Content-Type", "text/pain").
-		WithStringPayload("Hello")
-}
+			// Assert
+			testState.assertDidNotFailed()
+			assert := assertions.New(t)
+			assert.Len(calls, 2)
 
-func TestVerifyingSingleInvocationPasses(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+			call1 := calls[0]
+			assert.Equal("application/json", call1.GetRequest().Header.Get("Content-Type"))
+			call1Content := struct {
+				Foo string `json:"foo"`
+			}{}
+			call1.ReadJSONPayload(&call1Content)
+			assert.Equal("bar", call1Content.Foo)
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithStatusCode(http.StatusOK)
+			call2 := calls[1]
+			call2.
+				WithHeader("Content-Type", "text/pain").
+				WithStringPayload("Hello")
+		})
+	})
 
-	// Act
-	client := http.Client{}
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
+	t.Run("HasBeenCalledOnce()", func(t *testing.T) {
+		t.Parallel()
 
-	// Assert
-	testState.assertDidNotFailed()
-}
+		t.Run("passes when the endpoint was called exactly once", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-func TestVerifyingSingleInvocationFails(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithStatusCode(http.StatusOK)
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithStatusCode(http.StatusOK)
+			// Act
+			client := http.Client{}
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
-	// Act
-	client := http.Client{}
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
+			// Assert
+			testState.assertDidNotFailed()
+		})
 
-	// Assert
-	testState.assertFailedWithFatal()
-}
+		t.Run("fails when the endpoint was called more than once", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-func TestVerifyingSingleInvocationReturnsThePerformedCall(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithStatusCode(http.StatusOK)
 
-	endpoint := "/endpoint"
-	endpointURL := mockedAPI.GetURL().String() + endpoint
-	mockedAPI.
-		Stub(http.MethodPost, endpoint).
-		WithStatusCode(http.StatusOK)
-	client := http.Client{}
-	_, _ = client.Post(endpointURL, "text/plain", bytes.NewBuffer([]byte("Hello")))
+			// Act
+			client := http.Client{}
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
-	// Act
-	_ = mockedAPI.
-		Verify(http.MethodPost, endpoint).
-		HasBeenCalledOnce().
-		WithStringPayload("Hello").
-		WithHeader("Content-Type", "text/plain")
-}
+			// Assert
+			testState.assertFailedWithFatal()
+		})
 
-func TestVerifyingNoInvocationPasses(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		t.Run("fails when the endpoint was not called", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithStatusCode(http.StatusOK)
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithStatusCode(http.StatusOK)
 
-	// Act
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+			// Act
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
-	// Assert
-	testState.assertDidNotFailed()
-}
+			// Assert
+			testState.assertFailedWithFatal()
+		})
 
-func TestVerifyingNoInvocationFails(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		t.Run("returns the performed call", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithStatusCode(http.StatusOK)
+			endpoint := "/endpoint"
+			endpointURL := mockedAPI.GetURL().String() + endpoint
+			mockedAPI.
+				Stub(http.MethodPost, endpoint).
+				WithStatusCode(http.StatusOK)
+			client := http.Client{}
+			_, _ = client.Post(endpointURL, "text/plain", bytes.NewBuffer([]byte("Hello")))
 
-	// Act
-	client := http.Client{}
-	_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
-	mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+			// Act
+			_ = mockedAPI.
+				Verify(http.MethodPost, endpoint).
+				HasBeenCalledOnce().
+				WithStringPayload("Hello").
+				WithHeader("Content-Type", "text/plain")
+		})
+	})
 
-	// Assert
-	testState.assertFailedWithFatal()
+	t.Run("HasNotBeenCalled()", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("passes when the endpoint was not called", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
+
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithStatusCode(http.StatusOK)
+
+			// Act
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+
+			// Assert
+			testState.assertDidNotFailed()
+		})
+		t.Run("fails when the endpoint actually was called", func(t *testing.T) {
+			t.Parallel()
+			// Arrange
+			testState := NewTestingMock(t)
+			mockedAPI := API(testState)
+			defer func() { mockedAPI.Close() }()
+
+			mockedAPI.
+				Stub(http.MethodGet, "/endpoint").
+				WithStatusCode(http.StatusOK)
+
+			// Act
+			client := http.Client{}
+			_, _ = client.Get(mockedAPI.GetURL().String() + "/endpoint")
+			mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
+
+			// Assert
+			testState.assertFailedWithFatal()
+		})
+	})
 }

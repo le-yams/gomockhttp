@@ -61,7 +61,7 @@ func (testState *MockT) assertFailedWithFatal() {
 	}
 }
 
-func TestApiUrl(t *testing.T) {
+func Test_api_mock_should_return_underlying_server_url(t *testing.T) {
 	t.Parallel()
 	// Arrange
 	mockedAPI := API(NewTestingMock(t))
