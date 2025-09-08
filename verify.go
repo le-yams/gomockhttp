@@ -19,7 +19,11 @@ func (verifier *CallVerifier) HasBeenCalled(expectedCallsCount int) []*Invocatio
 
 // HasBeenCalledOnce asserts that the HTTP call has been made exactly once then returns the invocation.
 func (verifier *CallVerifier) HasBeenCalledOnce() *Invocation {
-	return verifier.HasBeenCalled(1)[0]
+	invocations := verifier.HasBeenCalled(1)
+	if len(invocations) > 0 {
+		return invocations[0]
+	}
+	return nil
 }
 
 // HasNotBeenCalled asserts that no HTTP call has been made.

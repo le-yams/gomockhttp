@@ -18,153 +18,157 @@ func (mockedAPI *APIMock) testCallWithQuery(method, path string, queryObject any
 	return e.Request(method, path).WithQueryObject(queryObject).Expect()
 }
 
-func TestApiNotStubbedEndpoint(t *testing.T) {
+func Test_StubbedEndpoint(t *testing.T) {
 	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
 
-	// Act
-	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
+	t.Run("fails when endpoint is not stubbed", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
 
-	// Assert
-	testState.assertFailedWithFatal()
-	call.Status(http.StatusNotFound)
-}
+		// Act
+		call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
-func TestApiStubbedEndpoint(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		// Assert
+		testState.assertFailedWithFatal()
+		call.Status(http.StatusNotFound)
+	})
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		With(func(writer http.ResponseWriter, request *http.Request) {
-			writer.Header().Add("Content-Type", "text/plain")
-			writer.WriteHeader(http.StatusCreated)
-			_, err := writer.Write([]byte("Hello"))
-			if err != nil {
-				t.Fatal(err)
-			}
-		})
+	t.Run("returns stubbed response", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
 
-	// Act
-	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
+		mockedAPI.
+			Stub(http.MethodGet, "/endpoint").
+			With(func(writer http.ResponseWriter, request *http.Request) {
+				writer.Header().Add("Content-Type", "text/plain")
+				writer.WriteHeader(http.StatusCreated)
+				_, err := writer.Write([]byte("Hello"))
+				if err != nil {
+					t.Fatal(err)
+				}
+			})
 
-	// Assert
-	call.
-		Status(http.StatusCreated).
-		Body().IsEqual("Hello")
+		// Act
+		call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
-	testState.assertDidNotFailed()
-}
+		// Assert
+		call.
+			Status(http.StatusCreated).
+			Body().IsEqual("Hello")
 
-func TestApiStubbedEndpointWithQuery(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		testState.assertDidNotFailed()
+	})
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		With(func(writer http.ResponseWriter, request *http.Request) {
-			name := request.FormValue("name")
-			writer.Header().Add("Content-Type", "text/plain")
-			writer.WriteHeader(http.StatusCreated)
-			_, err := writer.Write([]byte("Hello " + name))
-			if err != nil {
-				t.Fatal(err)
-			}
-		})
+	t.Run("can access query parameters", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
 
-	query := map[string]any{"name": "John"}
+		mockedAPI.
+			Stub(http.MethodGet, "/endpoint").
+			With(func(writer http.ResponseWriter, request *http.Request) {
+				name := request.FormValue("name")
+				writer.Header().Add("Content-Type", "text/plain")
+				writer.WriteHeader(http.StatusCreated)
+				_, err := writer.Write([]byte("Hello " + name))
+				if err != nil {
+					t.Fatal(err)
+				}
+			})
 
-	// Act
-	call := mockedAPI.testCallWithQuery(http.MethodGet, "/endpoint", query, t)
+		query := map[string]any{"name": "John"}
 
-	// Assert
-	call.
-		Status(http.StatusCreated).
-		Body().IsEqual("Hello John")
+		// Act
+		call := mockedAPI.testCallWithQuery(http.MethodGet, "/endpoint", query, t)
 
-	testState.assertDidNotFailed()
-}
+		// Assert
+		call.
+			Status(http.StatusCreated).
+			Body().IsEqual("Hello John")
 
-func TestApiStubbedEndpointWithJson(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		testState.assertDidNotFailed()
+	})
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithJSON(http.StatusOK, struct {
-			Value string `json:"value"`
-		}{Value: "Hello"})
+	t.Run("can return json response", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
 
-	// Act
-	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
+		mockedAPI.
+			Stub(http.MethodGet, "/endpoint").
+			WithJSON(http.StatusOK, struct {
+				Value string `json:"value"`
+			}{Value: "Hello"})
 
-	// Assert
-	testState.assertDidNotFailed()
+		// Act
+		call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
-	call.Header("Content-Type").IsEqual("application/json")
+		// Assert
+		testState.assertDidNotFailed()
 
-	responseObject := call.
-		Status(http.StatusOK).
-		JSON().Object()
+		call.Header("Content-Type").IsEqual("application/json")
 
-	responseObject.Value("value").IsEqual("Hello")
-}
+		responseObject := call.
+			Status(http.StatusOK).
+			JSON().Object()
 
-func TestApiStubbedEndpointWithBody(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
-	body := []byte("Hello!")
+		responseObject.Value("value").IsEqual("Hello")
+	})
 
-	mockedAPI.
-		Stub(http.MethodGet, "/endpoint").
-		WithBody(http.StatusOK, body, "text/plain")
+	t.Run("can return specified body", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
+		body := []byte("Hello!")
 
-	// Act
-	call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
+		mockedAPI.
+			Stub(http.MethodGet, "/endpoint").
+			WithBody(http.StatusOK, body, "text/plain")
 
-	// Assert
-	testState.assertDidNotFailed()
+		// Act
+		call := mockedAPI.testCall(http.MethodGet, "/endpoint", t)
 
-	call.Header("Content-Type").IsEqual("text/plain")
+		// Assert
+		testState.assertDidNotFailed()
 
-	call.
-		Status(http.StatusOK).
-		Body().IsEqual("Hello!")
-}
+		call.Header("Content-Type").IsEqual("text/plain")
 
-func TestApiStubbedEndpointWithDelay(t *testing.T) {
-	t.Parallel()
-	// Arrange
-	testState := NewTestingMock(t)
-	mockedAPI := API(testState)
-	defer func() { mockedAPI.Close() }()
+		call.
+			Status(http.StatusOK).
+			Body().IsEqual("Hello!")
+	})
 
-	stubbedDelay := 500 * time.Millisecond
+	t.Run("can timeout with specified delay", func(t *testing.T) {
+		t.Parallel()
+		// Arrange
+		testState := NewTestingMock(t)
+		mockedAPI := API(testState)
+		defer func() { mockedAPI.Close() }()
 
-	mockedAPI.
-		Stub(http.MethodPost, "/delayed").
-		WithDelay(stubbedDelay).
-		WithStatusCode(http.StatusOK)
+		stubbedDelay := 500 * time.Millisecond
 
-	// Act
-	call := mockedAPI.testCall(http.MethodPost, "/delayed", t)
+		mockedAPI.
+			Stub(http.MethodPost, "/delayed").
+			WithDelay(stubbedDelay).
+			WithStatusCode(http.StatusOK)
 
-	// Assert
-	testState.assertDidNotFailed()
-	call.RoundTripTime().Ge(stubbedDelay)
+		// Act
+		call := mockedAPI.testCall(http.MethodPost, "/delayed", t)
+
+		// Assert
+		testState.assertDidNotFailed()
+		call.RoundTripTime().Ge(stubbedDelay)
+	})
 }
