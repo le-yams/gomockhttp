@@ -90,9 +90,9 @@ func TestApiCall(t *testing.T) {
 
   api.
     Verify(http.MethodGet, "/foo").
-    HasBeenCalledOnce()
+    HasBeenCalledOnce().
     WithHeader("Content-Type", "application/json").
-	WithBearerAuthHeader(token)
+    WithBearerAuthHeader(token)
 }
 
 ```
