@@ -37,7 +37,7 @@ See the [StubBuilder documentation](https://pkg.go.dev/github.com/le-yams/gomock
 
 ### 3. Call the mocked API
 ```go
-resultBasedOnMockedResponses, err := codeCallingTheApi(api.GetUrl())
+resultBasedOnMockedResponses, err := codeCallingTheApi(api.GetURL())
 ```
 
 ### 4. Verify the API invocations
@@ -55,7 +55,7 @@ expectCall2.WithPayload(expectedPayload2)
 expectCall2 := calls[2]
 expectCall2.WithJSONPayload(map[string]any{"foo": "bar"})
 ```
-See [Invocation documentation](https://pkg.go.dev/github.com/le-yams/gomockhttp#Invocation) for full list of verification methods.
+See [CallVerifier documentation](https://pkg.go.dev/github.com/le-yams/gomockhttp#CallVerifier) for full list of verification methods.
 
 
 ## Example
