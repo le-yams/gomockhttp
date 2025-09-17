@@ -97,6 +97,27 @@ func (call *Invocation) ReadJSONPayload(obj any) {
 	}
 }
 
+// WithJSONPayload asserts that the invocation request contains the specified JSON payload. The expected
+// object is marshaled to JSON and then unmarshalled back to an interface{} to ensure that the comparison
+// is done on the actual JSON structure rather than the raw bytes.
+func (call *Invocation) WithJSONPayload(expected any) *Invocation {
+	marshalledExpected, err := json.Marshal(expected)
+	if err != nil {
+		call.testState.Fatal(err)
+	}
+
+	var untypedExpected any
+	err = json.Unmarshal(marshalledExpected, &untypedExpected)
+	if err != nil {
+		call.testState.Fatal(err)
+	}
+
+	var actual any
+	call.ReadJSONPayload(&actual)
+	assertions.Equal(call.testState, untypedExpected, actual)
+	return call
+}
+
 // WithUrlEncodedFormPayload assert that the invocation content type is application/x-www-form-urlencoded then returns
 // the form to be asserted.
 func (call *Invocation) WithUrlEncodedFormPayload() InvocationRequestForm {
