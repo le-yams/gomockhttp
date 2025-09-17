@@ -421,6 +421,89 @@ func Test_invocations(t *testing.T) {
 		})
 	})
 
+	t.Run("WithJSONPayload() should", func(t *testing.T) {
+		t.Parallel()
+
+		t.Run("fail without payload", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithoutBody(t)
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+			invocation.WithJSONPayload(map[string]string{"foo": "bar"})
+			testState.assertFailedWithError()
+		})
+
+		t.Run("fail with invalid json payload", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte(`{"invalid json"}`))
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+			invocation.WithJSONPayload(map[string]string{"foo": "bar"})
+			testState.assertFailedWithFatal()
+		})
+
+		t.Run("fail with unexpected json payload", func(t *testing.T) {
+			t.Parallel()
+			request := buildRequestWithBody(t, []byte(`{"foo":"bar"}`))
+			testState := NewTestingMock(t)
+			invocation := newInvocation(request, testState)
+			invocation.WithJSONPayload(map[string]string{"foo": "notbar"})
+			testState.assertFailedWithError()
+		})
+
+		t.Run("pass with expected json payload", func(t *testing.T) {
+			t.Parallel()
+
+			type foo struct {
+				Foo string `json:"foo"`
+			}
+
+			testCases := []struct {
+				name     string
+				expected any
+			}{
+				{
+					"anonymous struct",
+					struct {
+						Foo string `json:"foo"`
+					}{
+						Foo: "bar",
+					},
+				},
+				{
+					"struct type",
+					foo{
+						Foo: "bar",
+					},
+				},
+				{
+					"struct type pointer",
+					&foo{
+						Foo: "bar",
+					},
+				},
+				{
+					"map",
+					map[string]string{
+						"foo": "bar",
+					},
+				},
+			}
+
+			for _, testCase := range testCases {
+				t.Run(testCase.name, func(t *testing.T) {
+					t.Parallel()
+					request := buildRequestWithBody(t, []byte(`{"foo":"bar"}`))
+					testState := NewTestingMock(t)
+					invocation := newInvocation(request, testState)
+
+					invocation.WithJSONPayload(testCase.expected)
+					testState.assertDidNotFailed()
+				})
+			}
+		})
+	})
+
 	t.Run("WithUrlEncodedForm()", func(t *testing.T) {
 		t.Parallel()
 

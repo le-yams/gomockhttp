@@ -44,13 +44,16 @@ resultBasedOnMockedResponses, err := codeCallingTheApi(api.GetUrl())
 ```go
 calls := api.
   Verify(http.MethodPost, "/endpoint").
-  HasBeenCalled(2)
+  HasBeenCalled(3)
 
 expectCall1 := calls[0]
 expectCall1.WithPayload(expectedPayload1)
 
 expectCall2 := calls[1]
 expectCall2.WithPayload(expectedPayload2)
+
+expectCall2 := calls[2]
+expectCall2.WithJSONPayload(map[string]any{"foo": "bar"})
 ```
 See [Invocation documentation](https://pkg.go.dev/github.com/le-yams/gomockhttp#Invocation) for full list of verification methods.
 
