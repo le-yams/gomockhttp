@@ -42,7 +42,7 @@ func (stub *StubBuilder) WithStatusCode(statusCode int) *APIMock {
 
 // WithJSON creates a new stub handler returning the specified status code and JSON content.
 // The response header "Content-Type" is set to "application/json".
-func (stub *StubBuilder) WithJSON(statusCode int, content interface{}) *APIMock {
+func (stub *StubBuilder) WithJSON(statusCode int, content any) *APIMock {
 	body, err := json.Marshal(content)
 	if err != nil {
 		log.Fatal(err)
