@@ -14,7 +14,7 @@ A fluent testing library for mocking http apis.
 
 ## Getting started
 
-Create the API mock 
+### 1.  Create the API mock 
 ```go
 func TestApiCall(t *testing.T) {
   api := mockhttp.Api(t)
@@ -23,22 +23,24 @@ func TestApiCall(t *testing.T) {
 }
 ```
 
-Stub endpoints
+### 2. Stub endpoints
 ```go
 api.
   Stub(http.MethodGet, "/endpoint").
-  WithJson(http.StatusOK, jsonStub).
+  WithJSON(http.StatusOK, jsonStub).
 
   Stub(http.MethodPost, "/endpoint").
   WithStatusCode(http.StatusCreated)
 ```
 
-Call the mocked API
+See the [StubBuilder documentation](https://pkg.go.dev/github.com/le-yams/gomockhttp#StubBuilder) for full list of stubbing methods.
+
+### 3. Call the mocked API
 ```go
 resultBasedOnMockedResponses, err := codeCallingTheApi(api.GetUrl())
 ```
 
-Verify the API invocations
+### 4. Verify the API invocations
 ```go
 calls := api.
   Verify(http.MethodPost, "/endpoint").
@@ -50,7 +52,7 @@ expectCall1.WithPayload(expectedPayload1)
 expectCall2 := calls[1]
 expectCall2.WithPayload(expectedPayload2)
 ```
-
+See [Invocation documentation](https://pkg.go.dev/github.com/le-yams/gomockhttp#Invocation) for full list of verification methods.
 
 
 ## Example
