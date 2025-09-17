@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0](https://github.com/le-yams/gomockhttp/compare/v1.1.0...v1.2.0) (2025-09-17)
+
+
+### Features
+
+* verify json payload ([ebe130d](https://github.com/le-yams/gomockhttp/commit/ebe130d118125a3c20aeb9be598cf093295c8fa8))
+
+
+### Docs
+
+* fix and improve README ([ece3739](https://github.com/le-yams/gomockhttp/commit/ece3739d5d1020555b883f4b576f36beeaed0bfe))
+* fix readme code snippet ([63f5f2c](https://github.com/le-yams/gomockhttp/commit/63f5f2cf28e1b0df572c219797ba8f13d50e93fb))
+
+
+### Refactoring
+
+* reorganize tests ([7bcc06f](https://github.com/le-yams/gomockhttp/commit/7bcc06fd3bf08b5f1880208181b60ada4047d0f7))
+
 ## [1.1.0](https://github.com/le-yams/gomockhttp/compare/v1.0.0...v1.1.0) (2025-09-08)
 
 
