@@ -13,9 +13,9 @@ import (
 
 // Invocation represents a single HTTP request made to the mock server.
 type Invocation struct {
+	testState TestingT
 	request   *http.Request
 	payload   []byte
-	testState TestingT
 }
 
 func newInvocation(request *http.Request, testState TestingT) *Invocation {
@@ -63,18 +63,18 @@ func (call *Invocation) WithoutHeader(name string) *Invocation {
 }
 
 // WithAuthHeader asserts that the invocation request contains the specified auth header
-func (call *Invocation) WithAuthHeader(scheme string, value string) {
-	call.WithHeader("Authorization", scheme+" "+value)
+func (call *Invocation) WithAuthHeader(scheme string, value string) *Invocation {
+	return call.WithHeader("Authorization", scheme+" "+value)
 }
 
 // WithBasicAuthHeader asserts that the invocation request contains the specified basic auth header
-func (call *Invocation) WithBasicAuthHeader(username string, password string) {
-	call.WithAuthHeader("Basic", base64.StdEncoding.EncodeToString([]byte(username+":"+password)))
+func (call *Invocation) WithBasicAuthHeader(username string, password string) *Invocation {
+	return call.WithAuthHeader("Basic", base64.StdEncoding.EncodeToString([]byte(username+":"+password)))
 }
 
 // WithBearerAuthHeader asserts that the invocation request contains the specified bearer auth header
-func (call *Invocation) WithBearerAuthHeader(token string) {
-	call.WithAuthHeader("Bearer", token)
+func (call *Invocation) WithBearerAuthHeader(token string) *Invocation {
+	return call.WithAuthHeader("Bearer", token)
 }
 
 // WithPayload asserts that the invocation request contains the specified payload
