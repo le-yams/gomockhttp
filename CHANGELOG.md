@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.1](https://github.com/le-yams/gomockhttp/compare/v1.2.0...v1.2.1) (2025-09-24)
+
+
+### Bug Fixes
+
+* chainable verification methods ([e4af364](https://github.com/le-yams/gomockhttp/commit/e4af364a63431f0ddfad576619d8ce49b6deb971))
+
+
+### Docs
+
+* fix README ([60e9f7a](https://github.com/le-yams/gomockhttp/commit/60e9f7a1b88fd172ab3a66ccace62b95f10ce6b8))
+
 ## [1.2.0](https://github.com/le-yams/gomockhttp/compare/v1.1.0...v1.2.0) (2025-09-17)
 
 
