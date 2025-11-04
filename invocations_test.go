@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/le-yams/gotestingmock"
 	assertions "github.com/stretchr/testify/assert"
 )
 
@@ -30,12 +31,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("foo", "bar")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithHeader("foo", "bar")
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("pass with expected header having multiple values", func(t *testing.T) {
@@ -44,24 +45,24 @@ func Test_invocations(t *testing.T) {
 			request.Header.Add("foo", "bar1")
 			request.Header.Add("foo", "bar2")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithHeader("foo", "bar1", "bar2")
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fails when header is missing", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithHeader("foo", "bar")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fails when header has wrong value", func(t *testing.T) {
@@ -69,12 +70,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("foo", "bar")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithHeader("foo", "notbar")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fails when header has wrong values", func(t *testing.T) {
@@ -83,12 +84,12 @@ func Test_invocations(t *testing.T) {
 			request.Header.Add("foo", "bar1")
 			request.Header.Add("foo", "bar2")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithHeader("foo", "bar")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -100,12 +101,12 @@ func Test_invocations(t *testing.T) {
 
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithoutHeader("foo")
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when header is present", func(t *testing.T) {
@@ -113,12 +114,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("foo", "bar")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithoutHeader("foo")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -133,12 +134,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("Authorization", scheme+" "+value)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithAuthHeader(scheme, value)
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when header is missing", func(t *testing.T) {
@@ -148,12 +149,12 @@ func Test_invocations(t *testing.T) {
 
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithAuthHeader(scheme, value)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with wrong scheme", func(t *testing.T) {
@@ -164,12 +165,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("Authorization", "not"+scheme+" "+value)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithAuthHeader(scheme, value)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with wrong value", func(t *testing.T) {
@@ -180,12 +181,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("Authorization", scheme+" not"+value)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithAuthHeader(scheme, value)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -200,12 +201,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.SetBasicAuth(username, password)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBasicAuthHeader(username, password)
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when header is missing", func(t *testing.T) {
@@ -215,12 +216,12 @@ func Test_invocations(t *testing.T) {
 
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBasicAuthHeader(username, password)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with wrong username", func(t *testing.T) {
@@ -231,12 +232,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.SetBasicAuth("not"+username, password)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBasicAuthHeader(username, password)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with wrong password", func(t *testing.T) {
@@ -247,12 +248,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.SetBasicAuth(username, "not"+password)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBasicAuthHeader(username, password)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -267,12 +268,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("Authorization", "Bearer "+token)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBearerAuthHeader(token)
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when header is missing", func(t *testing.T) {
@@ -281,12 +282,12 @@ func Test_invocations(t *testing.T) {
 
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBearerAuthHeader(token)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with wrong token", func(t *testing.T) {
@@ -296,12 +297,12 @@ func Test_invocations(t *testing.T) {
 			request := buildRequest(t, http.MethodGet, "/endpoint")
 			request.Header.Add("Authorization", "Bearer wrong"+token)
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithBearerAuthHeader(token)
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -310,36 +311,36 @@ func Test_invocations(t *testing.T) {
 
 		t.Run("pass with expected payload", func(t *testing.T) {
 			t.Parallel()
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 
 			request := buildRequestWithBody(t, []byte("foo"))
 			invocation := newInvocation(request, testState)
 
 			invocation.WithPayload([]byte("foo"))
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail with wrong payload", func(t *testing.T) {
 			t.Parallel()
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			request := buildRequestWithBody(t, []byte{42})
 			invocation := newInvocation(request, testState)
 
 			invocation.WithPayload([]byte{43})
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail without payload", func(t *testing.T) {
 			t.Parallel()
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			request := buildRequestWithoutBody(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithPayload([]byte{43})
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -359,34 +360,34 @@ func Test_invocations(t *testing.T) {
 		t.Run("pass with expected string payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte("foo"))
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithStringPayload("foo")
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail with wrong string payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte("foo"))
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithStringPayload("notfoo")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail without payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithoutBody(t)
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithStringPayload("notfoo")
 
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 	})
 
@@ -409,7 +410,7 @@ func Test_invocations(t *testing.T) {
 		t.Run("fail the test on unmarshal error", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte(`{"invalid json"}`))
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			json := struct {
@@ -417,7 +418,7 @@ func Test_invocations(t *testing.T) {
 			}{}
 			invocation.ReadJSONPayload(&json)
 
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 	})
 
@@ -427,28 +428,28 @@ func Test_invocations(t *testing.T) {
 		t.Run("fail without payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithoutBody(t)
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 			invocation.WithJSONPayload(map[string]string{"foo": "bar"})
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("fail with invalid json payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte(`{"invalid json"}`))
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 			invocation.WithJSONPayload(map[string]string{"foo": "bar"})
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 
 		t.Run("fail with unexpected json payload", func(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte(`{"foo":"bar"}`))
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 			invocation.WithJSONPayload(map[string]string{"foo": "notbar"})
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("pass with expected json payload", func(t *testing.T) {
@@ -494,11 +495,11 @@ func Test_invocations(t *testing.T) {
 				t.Run(testCase.name, func(t *testing.T) {
 					t.Parallel()
 					request := buildRequestWithBody(t, []byte(`{"foo":"bar"}`))
-					testState := NewTestingMock(t)
+					testState := testingmock.New(t)
 					invocation := newInvocation(request, testState)
 
 					invocation.WithJSONPayload(testCase.expected)
-					testState.assertDidNotFailed()
+					testState.AssertDidNotFailed()
 				})
 			}
 		})
@@ -511,11 +512,11 @@ func Test_invocations(t *testing.T) {
 			t.Parallel()
 			request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithUrlEncodedFormPayload()
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("should fail when Content-Type header is not  application/x-www-form-urlencoded", func(t *testing.T) {
@@ -523,11 +524,11 @@ func Test_invocations(t *testing.T) {
 			request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 			request.Header.Add("Content-Type", "not a form")
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.WithUrlEncodedFormPayload()
-			testState.assertFailedWithError()
+			testState.AssertFailedWithError()
 		})
 
 		t.Run("Get() should return parameter value", func(t *testing.T) {
@@ -537,7 +538,7 @@ func Test_invocations(t *testing.T) {
 			expectedValue2 := "value 2!"
 			request := buildRequestWithBody(t, []byte("key1=value1&key2="+url.QueryEscape(expectedValue2)))
 			request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			// Act
@@ -566,12 +567,12 @@ func Test_invocations(t *testing.T) {
 						t.Parallel()
 						request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 						request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-						testState := NewTestingMock(t)
+						testState := testingmock.New(t)
 						invocation := newInvocation(request, testState)
 
 						invocation.WithUrlEncodedFormPayload().WithValues(values)
 
-						testState.assertDidNotFailed()
+						testState.AssertDidNotFailed()
 					})
 				}
 			})
@@ -590,12 +591,12 @@ func Test_invocations(t *testing.T) {
 						t.Parallel()
 						request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 						request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-						testState := NewTestingMock(t)
+						testState := testingmock.New(t)
 						invocation := newInvocation(request, testState)
 
 						invocation.WithUrlEncodedFormPayload().WithValues(values)
 
-						testState.assertFailedWithError()
+						testState.AssertFailedWithError()
 					})
 				}
 			})
@@ -609,13 +610,13 @@ func Test_invocations(t *testing.T) {
 				request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 				request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-				testState := NewTestingMock(t)
+				testState := testingmock.New(t)
 				invocation := newInvocation(request, testState)
 				invocation.
 					WithUrlEncodedFormPayload().
 					WithValuesExactly(map[string]string{"key1": "value1", "key2": "value 2!"})
 
-				testState.assertDidNotFailed()
+				testState.AssertDidNotFailed()
 			})
 
 			t.Run("fail when form does not contains exactly the expected values", func(t *testing.T) {
@@ -633,12 +634,12 @@ func Test_invocations(t *testing.T) {
 						t.Parallel()
 						request := buildRequestWithBody(t, []byte("key1=value1&key2=value+2%21"))
 						request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-						testState := NewTestingMock(t)
+						testState := testingmock.New(t)
 						invocation := newInvocation(request, testState)
 
 						invocation.WithUrlEncodedFormPayload().WithValuesExactly(values)
 
-						testState.assertFailedWithError()
+						testState.AssertFailedWithError()
 					})
 				}
 			})
@@ -652,14 +653,14 @@ func Test_invocations(t *testing.T) {
 				expectedValue2 := "value 2!"
 				request := buildRequestWithBody(t, []byte("key1=value1&key2="+url.QueryEscape(expectedValue2)))
 				request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-				testState := NewTestingMock(t)
+				testState := testingmock.New(t)
 				invocation := newInvocation(request, testState)
 
 				invocation.WithUrlEncodedFormPayload().
 					WithValue("key1", "value1").
 					WithValue("key2", expectedValue2)
 
-				testState.assertDidNotFailed()
+				testState.AssertDidNotFailed()
 			})
 
 			t.Run("fail when form does not contains the expected value", func(t *testing.T) {
@@ -686,12 +687,12 @@ func Test_invocations(t *testing.T) {
 						t.Parallel()
 						request := buildRequestWithBody(t, []byte(body))
 						request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-						testState := NewTestingMock(t)
+						testState := testingmock.New(t)
 						invocation := newInvocation(request, testState)
 
 						invocation.WithUrlEncodedFormPayload().WithValue(key, value)
 
-						testState.assertFailedWithError()
+						testState.AssertFailedWithError()
 					})
 				}
 			})
@@ -707,7 +708,7 @@ func Test_invocations(t *testing.T) {
 			value := "value !"
 			request := buildRequestWithURL(t, "/endpoint?foo=bar&bar=foo&value="+url.QueryEscape(value))
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.
@@ -715,7 +716,7 @@ func Test_invocations(t *testing.T) {
 				WithQueryValue("bar", "foo").
 				WithQueryValue("value", value)
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when the URL query does not contains the expected parameter", func(t *testing.T) {
@@ -737,12 +738,12 @@ func Test_invocations(t *testing.T) {
 				useCase := useCases[i]
 				t.Run(useCase.name, func(t *testing.T) {
 					t.Parallel()
-					testState := NewTestingMock(t)
+					testState := testingmock.New(t)
 					invocation := newInvocation(request, testState)
 
 					invocation.WithQueryValue(useCase.key, useCase.value)
 
-					testState.assertFailedWithError()
+					testState.AssertFailedWithError()
 				})
 			}
 		})
@@ -756,7 +757,7 @@ func Test_invocations(t *testing.T) {
 			value := "value !"
 			request := buildRequestWithURL(t, "/endpoint?foo=bar&bar=foo&value="+url.QueryEscape(value))
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.
@@ -765,7 +766,7 @@ func Test_invocations(t *testing.T) {
 					"value": value,
 				})
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fail when the URL query does not contains the expected parameters", func(t *testing.T) {
@@ -787,12 +788,12 @@ func Test_invocations(t *testing.T) {
 				t.Run(useCase.name, func(t *testing.T) {
 					t.Parallel()
 					request := buildRequestWithURL(t, useCase.url)
-					testState := NewTestingMock(t)
+					testState := testingmock.New(t)
 					invocation := newInvocation(request, testState)
 
 					invocation.WithQueryValues(values)
 
-					testState.assertFailedWithError()
+					testState.AssertFailedWithError()
 				})
 			}
 		})
@@ -805,7 +806,7 @@ func Test_invocations(t *testing.T) {
 			value := "value !"
 			request := buildRequestWithURL(t, "/endpoint?foo=bar&value="+url.QueryEscape(value))
 
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			invocation := newInvocation(request, testState)
 
 			invocation.
@@ -814,7 +815,7 @@ func Test_invocations(t *testing.T) {
 					"value": value,
 				})
 
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 		t.Run("fail when the URL query does not contains exactly the expected parameters", func(t *testing.T) {
 			t.Parallel()
@@ -836,12 +837,12 @@ func Test_invocations(t *testing.T) {
 				t.Run(useCase.name, func(t *testing.T) {
 					t.Parallel()
 					request := buildRequestWithURL(t, useCase.url)
-					testState := NewTestingMock(t)
+					testState := testingmock.New(t)
 					invocation := newInvocation(request, testState)
 
 					invocation.WithQueryValuesExactly(values)
 
-					testState.assertFailedWithError()
+					testState.AssertFailedWithError()
 				})
 			}
 		})

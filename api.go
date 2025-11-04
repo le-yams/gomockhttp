@@ -6,21 +6,17 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/le-yams/gotestingmock"
 )
 
-// TestingT is an interface wrapper around *testing.T.
-type TestingT interface {
-	Error(args ...any)
-	Errorf(format string, args ...any)
-	Fatal(args ...any)
-	Fatalf(format string, args ...any)
-}
+type T testingmock.IT
 
 // APIMock is a representation of a mocked API. It allows to stub HTTP calls and verify invocations.
 type APIMock struct {
 	testServer  *httptest.Server
 	calls       map[HTTPCall]http.HandlerFunc
-	testState   TestingT
+	testState   T
 	invocations map[HTTPCall][]*Invocation
 	mu          sync.Mutex
 }
@@ -31,8 +27,8 @@ type HTTPCall struct {
 	Path   string
 }
 
-// API creates a new APIMock instance and starts a server exposing it.
-func API(testState TestingT) *APIMock {
+// API creates a new APIMock instance and starts a server exposing it. The server is automatically stopped during test cleanup.
+func API(testState T) *APIMock {
 	mockedAPI := &APIMock{
 		calls:       map[HTTPCall]http.HandlerFunc{},
 		testState:   testState,
@@ -60,11 +56,12 @@ func API(testState TestingT) *APIMock {
 		}
 	}))
 	mockedAPI.testServer = testServer
+	testState.Cleanup(mockedAPI.Close)
 
 	return mockedAPI
 }
 
-// Close stops the underlying server.
+// Close stops the underlying server. This method is automatically called during test cleanup.
 func (mockedAPI *APIMock) Close() {
 	mockedAPI.testServer.Close()
 }
