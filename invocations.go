@@ -13,12 +13,12 @@ import (
 
 // Invocation represents a single HTTP request made to the mock server.
 type Invocation struct {
-	testState TestingT
+	testState T
 	request   *http.Request
 	payload   []byte
 }
 
-func newInvocation(request *http.Request, testState TestingT) *Invocation {
+func newInvocation(request *http.Request, testState T) *Invocation {
 	var data []byte
 	var err error
 
@@ -180,7 +180,7 @@ func (call *Invocation) WithQueryValuesExactly(values map[string]string) *Invoca
 
 // InvocationRequestForm represents a form payload of an HTTP request made to the mock server.
 type InvocationRequestForm struct {
-	testState  TestingT
+	testState  T
 	invocation *Invocation
 	formValues url.Values
 }

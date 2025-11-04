@@ -18,10 +18,12 @@ A fluent testing library for mocking http apis.
 ```go
 func TestApiCall(t *testing.T) {
   api := mockhttp.Api(t)
-  defer func() { api.Close() }()
+  
   //...
 }
 ```
+> Note: the underlying mock server is automatically closed at the end of the test.
+> If you need to close it earlier, you can call the `api.Close()` method.
 
 ### 2. Stub endpoints
 ```go
