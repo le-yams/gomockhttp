@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/le-yams/gotestingmock"
 	assertions "github.com/stretchr/testify/assert"
 )
 
@@ -17,9 +18,9 @@ func Test_Verify_Endpoint(t *testing.T) {
 		t.Run("passes when the endpoint was called the expected number of times", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -34,15 +35,15 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(2)
 
 			// Assert
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fails when the endpoint was not called the expected number of times", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -57,15 +58,15 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalled(3)
 
 			// Assert
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 
 		t.Run("returns the performed calls", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			endpoint := "/endpoint"
 			endpointURL := mockedAPI.GetURL().String() + endpoint
@@ -80,7 +81,7 @@ func Test_Verify_Endpoint(t *testing.T) {
 			calls := mockedAPI.Verify(http.MethodPost, endpoint).HasBeenCalled(2)
 
 			// Assert
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 			assert := assertions.New(t)
 			assert.Len(calls, 2)
 
@@ -105,9 +106,9 @@ func Test_Verify_Endpoint(t *testing.T) {
 		t.Run("passes when the endpoint was called exactly once", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -119,15 +120,15 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
 			// Assert
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 
 		t.Run("fails when the endpoint was called more than once", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -140,15 +141,15 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
 			// Assert
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 
 		t.Run("fails when the endpoint was not called", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -158,15 +159,15 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasBeenCalledOnce()
 
 			// Assert
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 
 		t.Run("returns the performed call", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			endpoint := "/endpoint"
 			endpointURL := mockedAPI.GetURL().String() + endpoint
@@ -191,9 +192,9 @@ func Test_Verify_Endpoint(t *testing.T) {
 		t.Run("passes when the endpoint was not called", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -203,14 +204,14 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
 
 			// Assert
-			testState.assertDidNotFailed()
+			testState.AssertDidNotFailed()
 		})
 		t.Run("fails when the endpoint actually was called", func(t *testing.T) {
 			t.Parallel()
 			// Arrange
-			testState := NewTestingMock(t)
+			testState := testingmock.New(t)
 			mockedAPI := API(testState)
-			defer func() { mockedAPI.Close() }()
+			t.Cleanup(mockedAPI.Close)
 
 			mockedAPI.
 				Stub(http.MethodGet, "/endpoint").
@@ -222,7 +223,7 @@ func Test_Verify_Endpoint(t *testing.T) {
 			mockedAPI.Verify(http.MethodGet, "/endpoint").HasNotBeenCalled()
 
 			// Assert
-			testState.assertFailedWithFatal()
+			testState.AssertFailedWithFatal()
 		})
 	})
 }
