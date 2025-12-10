@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/le-yams/gomockhttp/compare/v1.2.1...v1.3.0) (2025-12-10)
+
+
+### Features
+
+* automatically close underlying server on cleanup ([3929334](https://github.com/le-yams/gomockhttp/commit/3929334a16d86c63458d6a1b157233702d0b5d92))
+
 ## [1.2.1](https://github.com/le-yams/gomockhttp/compare/v1.2.0...v1.2.1) (2025-09-24)
 
 
